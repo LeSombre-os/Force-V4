@@ -1,0 +1,2155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Force - Dashboard</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--surface:#161618;--surface-2:#1e1e20;--surface-3:#2a2a2d;--border:rgba(255,255,255,0.07);--border-2:rgba(255,255,255,0.12);--text:#e8e6e3;--text-2:#949296;--text-3:#6b696e;--accent:#eab308;--accent-bg:rgba(234,179,8,0.12);--success:#22c55e;--success-bg:rgba(34,197,94,0.12);--danger:#ef4444;--danger-bg:rgba(239,68,68,0.12);--blue:#3b82f6;--blue-bg:rgba(59,130,246,0.12);--orange:#f97316;--orange-bg:rgba(249,115,22,0.12);--font:system-ui,-apple-system,sans-serif;--font-mono:ui-monospace,SFMono-Regular,Menlo,monospace;--radius:10px;--radius-lg:16px;--sidebar-w:220px;--header-h:0px}
+body.light{--bg:#f5f5f0;--surface:#ffffff;--surface-2:#e8e7e4;--surface-3:#dddcd8;--border:rgba(0,0,0,0.08);--border-2:rgba(0,0,0,0.15);--text:#1a1a18;--text-2:#6b696e;--text-3:#949296}
+html,body{height:100%;font-family:var(--font);font-size:15px;line-height:1.5;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+button{cursor:pointer;font:inherit;color:inherit;border:none;background:none}
+input,textarea,select{font:inherit;color:inherit;border:none;outline:none;background:none}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+a{color:var(--accent);text-decoration:none}
+
+.layout{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;padding:12px 8px;gap:2px}
+.sidebar-brand{padding:12px 12px 20px;font-weight:800;font-size:18px;letter-spacing:-0.02em;color:var(--accent);display:flex;align-items:center;gap:8px}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius);color:var(--text-2);font-weight:500;font-size:14px;transition:all .15s}
+.sidebar-item:hover{background:var(--surface-2);color:var(--text)}
+.sidebar-item.active{background:var(--accent-bg);color:var(--accent)}
+.sidebar-item svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0}
+.sidebar-spacer{flex:1}
+.sidebar-footer{padding:8px 14px;font-size:12px;color:var(--text-3)}
+
+.main{flex:1;overflow-y:auto;padding:28px 32px;min-width:0}
+.main::-webkit-scrollbar{width:6px}
+.main::-webkit-scrollbar-track{background:transparent}
+.main::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:3px}
+
+.view{display:none}
+.view.active{display:block}
+
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-title{font-size:26px;font-weight:800;letter-spacing:-0.02em}
+.page-subtitle{font-size:14px;color:var(--text-2);margin-top:2px}
+.page-actions{display:flex;gap:8px;align-items:center}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:24px}
+.card-title{font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.card-value{font-size:32px;font-weight:700;letter-spacing:-0.02em;font-family:var(--font-mono)}
+.card-label{font-size:13px;color:var(--text-2);margin-top:2px}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-bottom:32px}
+.stats-grid .card{transition:all .2s}
+.stats-grid .card:hover{transform:translateY(-2px);border-color:var(--border-2)}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:24px}
+.chart-grid .chart-card{margin-bottom:0}
+.chart-card .card-title{margin-bottom:10px}
+.chart-card canvas{width:100%;height:280px;display:block}
+.chart-desc{font-size:13px;color:var(--text-3);margin-top:8px;font-style:italic;line-height:1.5}
+.card-gap{margin-bottom:24px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:var(--radius);font-weight:600;font-size:13px;transition:all .15s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--accent);color:#0a0a0a}
+.btn-secondary{background:var(--surface-3);color:var(--text)}
+.btn-secondary:hover{background:var(--border-2)}
+.btn-success{background:var(--success);color:#0a0a0a}
+.btn-danger{background:var(--danger-bg);color:var(--danger)}
+.btn-ghost{background:transparent;color:var(--text-2);padding:6px 10px}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-icon{width:34px;height:34px;padding:0;border-radius:50%}
+
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600}
+.badge-session-0{background:var(--blue-bg);color:var(--blue)}
+.badge-session-1{background:var(--orange-bg);color:var(--orange)}
+.badge-session-2{background:#1a3a2a;color:#4ade80}
+.badge-session-3{background:#2a1a3a;color:#c084fc}
+.badge-session-4{background:#3a1a2a;color:#f472b6}
+.badge-session-5{background:#1a2a3a;color:#22d3ee}
+.badge-session-6{background:#3a2a1a;color:#fb923c}
+.badge-session-7{background:#2a2a1a;color:#facc15}
+.badge-accent{background:var(--accent-bg);color:var(--accent)}
+.badge-success{background:var(--success-bg);color:var(--success)}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;padding:10px 12px;color:var(--text-2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border)}
+tr:hover td{background:var(--surface-2)}
+
+input.input,textarea.input,select.input{width:100%;padding:10px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);font-size:14px;color:var(--text);transition:border-color .15s}
+input.input:focus,textarea.input:focus,select.input:focus{border-color:var(--accent)}
+textarea.input{resize:vertical;min-height:70px}
+.input-group{margin-bottom:14px}
+.input-label{font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:4px;display:block}
+
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border-2);border-radius:var(--radius-lg);padding:24px;width:90%;max-width:500px;max-height:85vh;overflow-y:auto}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:16px}
+.modal-actions{display:flex;gap:8px;margin-top:20px;justify-content:flex-end}
+.modal-actions .btn{flex:auto;max-width:200px}
+.modal-lg{max-width:650px}
+
+.code-area{width:100%;min-height:80px;padding:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font-mono);font-size:12px;color:var(--text-2);resize:vertical}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border-2);border-radius:var(--radius);padding:12px 20px;font-size:14px;font-weight:500;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.toast.success{border-color:var(--success)}
+.toast.error{border-color:var(--danger)}
+
+.empty-state{text-align:center;padding:48px 20px;color:var(--text-3)}
+.empty-state svg{width:48px;height:48px;stroke:var(--text-3);margin-bottom:12px;opacity:.5}
+.empty-state p{font-size:15px}
+
+.session-row{cursor:pointer;transition:background .15s}
+.session-row:hover td{background:var(--surface-2)!important}
+.exercise-block{padding:12px;background:var(--surface-2);border-radius:var(--radius);margin-bottom:8px;border-left:3px solid var(--accent)}
+.exercise-block:nth-child(even){background:var(--surface)}
+.exercise-block:last-child{margin-bottom:0}
+.exercise-block-name{font-weight:600;font-size:15px}
+.exercise-block-sets{font-family:var(--font-mono);font-size:14px;color:var(--text);margin-top:4px}
+.exercise-block-meta{display:flex;gap:12px;margin-top:4px;font-size:13px}
+
+.settings-card{text-align:center;padding:20px}
+.settings-card .btn{padding:10px 20px;font-size:14px}
+.settings-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px}
+.settings-stats-grid .stat-box{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 12px;text-align:center}
+.settings-stats-grid .stat-box .card-value{font-size:28px}
+.settings-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.settings-actions .btn{padding:14px 28px;font-size:15px;font-weight:700;border-radius:var(--radius-lg)}
+.btn-import{background:var(--success);color:#0a0a0a}
+.btn-import:hover{filter:brightness(1.1)}
+
+.program-exercise{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--surface-2);border-left:3px solid var(--accent-bg);border-radius:var(--radius);margin-bottom:8px;cursor:pointer;transition:all .15s}
+.program-exercise:hover{background:var(--surface-3);border-left-color:var(--accent)}
+.program-exercise-info{flex:1}
+.program-exercise-name{font-weight:600;font-size:15px;margin-bottom:4px}
+.program-exercise-targets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.program-exercise-targets .tg{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--surface-3);color:var(--text-2)}
+.program-exercise-targets .tg-reps{background:var(--accent-bg);color:var(--accent)}
+.program-exercise-targets .tg-weight{background:var(--success-bg);color:var(--success)}
+.program-exercise-targets .tg-rest{background:var(--blue-bg);color:var(--blue)}
+.program-exercise-last{font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:4px;margin-top:2px}
+
+.ex-lib-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface-2);border-radius:var(--radius);margin-bottom:4px;font-size:13px;transition:background .15s;cursor:pointer}
+.ex-lib-item:hover{background:var(--surface-3)}
+.ex-lib-item .ex-lib-name{flex:1;font-weight:500}
+.ex-lib-item .ex-lib-count{font-size:11px;color:var(--text-3);font-family:var(--font-mono)}
+.session-card{margin-bottom:16px}
+.session-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filter-bar select{min-width:140px}
+
+.fade-in{animation:fadeIn .25s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.ai-question{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface-2);border-radius:var(--radius);margin-bottom:0;cursor:pointer;transition:all .15s;border:1px solid transparent}
+.ai-question:hover{background:var(--surface-3);border-color:var(--border-2)}
+.ai-question:has(input:checked){background:var(--accent-bg);border-color:var(--accent)}
+.ai-prompt-area{width:100%;min-height:160px;padding:14px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font-mono);font-size:12px;color:var(--text-2);resize:vertical;line-height:1.6}
+
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px}
+.calendar-day{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:var(--radius);background:var(--surface-2);border:1px solid var(--border);font-size:12px;cursor:pointer;transition:all .15s;min-height:68px;padding:4px 2px}
+.calendar-day:hover{background:var(--surface-3);border-color:var(--accent)}
+.calendar-day.today{border-color:var(--accent);background:var(--accent-bg)}
+.calendar-day .day-name{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.calendar-day .day-num{font-weight:700;font-size:14px}
+.calendar-day .day-label{font-size:10px;color:var(--text-3);margin-top:2px;text-align:center;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.calendar-day .day-empty{font-size:10px;color:var(--text-3)}
+.calendar-header{font-size:12px;font-weight:600;color:var(--text-2);text-align:center;padding:4px 0}
+.calendar-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.calendar-nav .btn{padding:6px 12px;font-size:13px}
+
+@media(max-width:800px){.sidebar{width:56px}.sidebar-item span,.sidebar-brand span{display:none}.sidebar-brand{padding:12px 8px 20px;justify-content:center}.main{padding:16px}.chart-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.stats-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar">
+    <div class="sidebar-brand"><span>Force</span></div>
+    <button class="sidebar-item active" data-view="dashboard">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="sidebar-item" data-view="sessions">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Séances</span>
+    </button>
+    <button class="sidebar-item" data-view="program">
+      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      <span>Programme</span>
+    </button>
+    <button class="sidebar-item" data-view="planning">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Planning</span>
+    </button>
+    <button class="sidebar-item" data-view="charts">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Graphiques</span>
+    </button>
+    <button class="sidebar-item" data-view="assistant">
+      <svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M4 12a8 8 0 0 1 16 0v4a8 8 0 0 1-16 0v-4z"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+      <span>Assistant IA</span>
+    </button>
+    <button class="sidebar-item" data-view="settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Réglages</span>
+    </button>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-footer">
+      <button class="btn btn-sm btn-ghost" onclick="toggleTheme()" style="width:100%;justify-content:flex-start" id="theme-btn">☀️ Clair</button>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div id="view-dashboard" class="view active"></div>
+    <div id="view-sessions" class="view"></div>
+    <div id="view-program" class="view"></div>
+    <div id="view-planning" class="view"></div>
+    <div id="view-charts" class="view"></div>
+    <div id="view-assistant" class="view"></div>
+    <div id="view-settings" class="view"></div>
+  </main>
+</div>
+
+<div id="modal" class="modal-overlay">
+  <div class="modal" id="modal-content"></div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+// ── DATA LAYER ──
+const STORAGE_KEY = 'force_dash_v4'
+const DEFAULT_DATA = { version:3, createdAt:'', updatedAt:'', program: { name:'Mon Programme', sessions:[], schedule:{type:'rotation',order:[],daysOfWeek:[]} }, programs:[], scheduleGrid:{}, scheduleTemplate:{}, exerciseLibrary:[], config:{ aiPresets:[] }, workouts:[] }
+let appData = null
+let dirHandle = null
+let currentView = 'dashboard'
+let chartCache = {}
+
+function deepClone(o){return JSON.parse(JSON.stringify(o))}
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function logError(ctx,err){console.warn('[ForceDash] '+ctx+': '+(err instanceof Error?err.message:String(err)))}
+function parseLocalDate(str){if(!str)return new Date();const p=str.split('-');return p.length===3?new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2])):new Date(str)}
+function fmtDate(d){return parseLocalDate(d).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}
+function fmtDur(s){const m=Math.floor(s/60);return m+':'+(s%60).toString().padStart(2,'0')}
+function fmtMonth(d){return parseLocalDate(d).toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}
+function getSesh(d,id){return d.program.sessions.find(s=>s.id===id)}
+function displayWeight(w,bw){return w>0?w+' kg':bw?'PDC':'0 kg'}
+function getSessionColorClass(sessionId,sessions){
+  const idx=sessions.findIndex(s=>s.id===sessionId)
+  return 'badge-session-'+(idx>=0?idx%8:0)
+}
+function fmtDateStr(d){
+  const y=d.getFullYear(),m=(d.getMonth()+1).toString().padStart(2,'0'),day=d.getDate().toString().padStart(2,'0')
+  return y+'-'+m+'-'+day
+}
+
+// File System Access API
+async function openDataDir() {
+  try {
+    dirHandle = await window.showDirectoryPicker({ id:'force-v4', mode:'readwrite' })
+    const fileHandle = await dirHandle.getFileHandle('force-v4.json', { create:true })
+    const file = await fileHandle.getFile()
+    const text = await file.text()
+    if (text.trim()) {
+      appData = JSON.parse(text)
+    } else {
+      appData = deepClone(DEFAULT_DATA)
+    }
+    return true
+  } catch(e) {
+    if (e.name === 'AbortError' || e.name === 'SecurityError') return false
+    logError('openDataDir',e)
+    return false
+  }
+}
+
+async function saveDataFile() {
+  if (!dirHandle || !appData) return
+  try {
+    appData.updatedAt = new Date().toISOString()
+    const fileHandle = await dirHandle.getFileHandle('force-v4.json', { create:true })
+    const writable = await fileHandle.createWritable()
+    await writable.write(JSON.stringify(appData, null, 2))
+    await writable.close()
+  } catch(e) { console.error('Save error:', e) }
+}
+
+function storeBackup() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)) } catch {}
+}
+
+function loadBackup() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) { appData = JSON.parse(raw); return true }
+  } catch {}
+  return false
+}
+
+// ── HELPERS ──
+function calcVol(w) {
+  return w.exercises.reduce((t,e)=>t+e.sets.reduce((s,st)=>s+(st.reps||0)*(st.weight||0),0),0)
+}
+function calcStreak(d) {
+  if(!d.workouts.length) return 0
+  const sorted=[...d.workouts].sort((a,b)=>parseLocalDate(b.date)-parseLocalDate(a.date))
+  const sched=d.program.schedule
+  const maxGap=sched.type==='weekly'&&sched.daysOfWeek.length
+    ?Math.max(...sched.daysOfWeek.map((day,i,a)=>{if(i===0)return Math.min(day+7-a[a.length-1],day);return day-a[i-1]}))
+    :sched.order.length>1?sched.order.length:4
+  let st=1
+  for(let i=1;i<sorted.length;i++){
+    const prev=parseLocalDate(sorted[i-1].date),curr=parseLocalDate(sorted[i].date)
+    if((prev-curr)/(864e5)<=maxGap) st++; else break
+  }
+  return st
+}
+function est1RM(reps,weight){
+  if(reps<=0||weight<=0) return 0
+  if(reps===1) return weight
+  return Math.round(weight*(1+reps/30)*10)/10
+}
+function getLastEx(d,exId){
+  for(let i=d.workouts.length-1;i>=0;i--){
+    const ex=d.workouts[i].exercises.find(e=>e.exerciseId===exId)
+    if(ex) return ex
+  } return null
+}
+function getSeshByDate(d,w){
+  const allSessions=d.programs.flatMap(p=>p.sessions)
+  const s=allSessions.find(s=>s.id===w.sessionId)
+  return s||{name:w.sessionId,exercises:[]}
+}
+
+// Migration v1 → v2 (programs[], scheduleGrid, exerciseLibrary)
+function migrateDataV2(d){
+  if(d.version>=2)return
+  d.version=2
+  if(!d.programs||!d.programs.length){
+    d.programs=[deepClone(d.program)]
+  }
+  if(!d.scheduleGrid)d.scheduleGrid={}
+  if(!d.scheduleTemplate)d.scheduleTemplate={}
+  // Migrate old scheduleGrid format (string program name → {progIdx,sessionId})
+  for(const key of Object.keys(d.scheduleGrid)){
+    const val=d.scheduleGrid[key]
+    if(typeof val==='string'&&val){
+      const idx=d.programs.findIndex(p=>p.name===val)
+      d.scheduleGrid[key]={progIdx:idx>=0?idx:0,sessionId:null}
+    }
+  }
+  if(!d.exerciseLibrary)d.exerciseLibrary=[]
+  if(!d.config)d.config={aiPresets:[]}
+  // Build exercise library from existing sessions
+  const seen=new Set()
+  for(const p of d.programs){
+    for(const s of p.sessions){
+      for(const e of s.exercises){
+        if(!seen.has(e.id)){
+          seen.add(e.id)
+          d.exerciseLibrary.push({id:e.id,name:e.name})
+        }
+      }
+    }
+  }
+}
+
+function migrateDataV3(d){
+  if(d.version>=3)return
+  d.version=3
+  // Convert scheduleGrid: progIdx → progName
+  for(const key of Object.keys(d.scheduleGrid||{})){
+    const entry=d.scheduleGrid[key]
+    if(entry&&entry.progIdx!==undefined&&!entry.progName){
+      const prog=d.programs[entry.progIdx]
+      if(prog){
+        entry.progName=prog.name
+      }
+      delete entry.progIdx
+    }
+  }
+  // Convert scheduleTemplate: progIdx → progName
+  for(const key of Object.keys(d.scheduleTemplate||{})){
+    const entry=d.scheduleTemplate[key]
+    if(entry&&entry.progIdx!==undefined&&!entry.progName){
+      const prog=d.programs[entry.progIdx]
+      if(prog){
+        entry.progName=prog.name
+      }
+      delete entry.progIdx
+    }
+  }
+}
+
+// ── NAV ──
+function switchView(id){
+  currentView=id
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'))
+  document.querySelectorAll('.sidebar-item').forEach(i=>i.classList.remove('active'))
+  document.getElementById('view-'+id).classList.add('active')
+  document.querySelector(`[data-view="${id}"]`).classList.add('active')
+  switch(id){
+    case'dashboard':renderDashboard();break
+    case'sessions':renderSessions();break
+    case'program':renderProgram();break
+    case'planning':renderPlanning();break
+    case'charts':renderCharts();break
+    case'settings':renderSettings();break
+    case'assistant':renderAssistant();break
+  }
+}
+document.querySelectorAll('.sidebar-item[data-view]').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)))
+
+// ── MODAL ──
+function showModal(html,cls){
+  document.getElementById('modal-content').innerHTML=html
+  const m=document.getElementById('modal')
+  m.classList.add('active')
+  if(cls) m.querySelector('.modal').classList.add(cls)
+}
+function hideModal(){document.getElementById('modal').classList.remove('active')}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)hideModal()})
+
+function toast(msg,type){
+  const el=document.getElementById('toast')
+  el.textContent=msg;el.className='toast';if(type)el.classList.add(type)
+  el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500)
+}
+
+// ── THEME ──
+function toggleTheme(){
+  document.body.classList.toggle('light')
+  const b=document.getElementById('theme-btn')
+  const isLight=document.body.classList.contains('light')
+  b.textContent=isLight?'🌙 Sombre':'☀️ Clair'
+  localStorage.setItem('force_dash_theme',isLight?'light':'dark')
+}
+function restoreTheme(){
+  const t=localStorage.getItem('force_dash_theme')
+  if(t==='light'){document.body.classList.add('light');document.getElementById('theme-btn').textContent='🌙 Sombre'}
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  DASHBOARD VIEW
+// ═══════════════════════════════════════════════════════════════════
+
+function renderDashboard() {
+  const v=document.getElementById('view-dashboard')
+  const d=appData
+  const total=d.workouts.length
+  const streak=calcStreak(d)
+  const totalVol=d.workouts.reduce((t,w)=>t+calcVol(w),0)
+  const avgRpe=d.workouts.reduce((t,w)=>t+w.exercises.reduce((s,e)=>s+(e.rpe||0),0)/Math.max(w.exercises.filter(e=>e.rpe>0).length,1),0)/Math.max(d.workouts.length,1)
+  const best=d.workouts.reduce((b,w)=>{const v=calcVol(w);return v>b.v?{w,v}:b},{w:null,v:0})
+  const lastW=d.workouts.length?d.workouts[d.workouts.length-1]:null
+
+  let html=`<div class="page-header"><div>
+    <h1 class="page-title">Dashboard</h1>
+    <div class="page-subtitle">${total} séances · ${totalVol} kg volume total</div>
+  </div></div>
+
+  <div class="stats-grid">
+    <div class="card"><div style="font-size:20px;margin-bottom:2px">🏋️</div><div class="card-title">Séances</div><div class="card-value">${total}</div><div class="card-label">au total</div></div>
+    <div class="card"><div style="font-size:20px;margin-bottom:2px">📊</div><div class="card-title">Volume</div><div class="card-value">${totalVol.toLocaleString()}</div><div class="card-label">kg soulevés</div></div>
+    <div class="card"><div style="font-size:20px;margin-bottom:2px">🔥</div><div class="card-title">Série</div><div class="card-value">${streak}</div><div class="card-label">séances consécutives</div></div>
+    <div class="card"><div style="font-size:20px;margin-bottom:2px">💪</div><div class="card-title">RPE moyen</div><div class="card-value">${avgRpe?avgRpe.toFixed(1):'-'}</div><div class="card-label">/10</div></div>
+    <div class="card"><div style="font-size:20px;margin-bottom:2px">🏆</div><div class="card-title">Meilleur volume</div><div class="card-value">${best.v?best.v.toLocaleString():'-'}</div><div class="card-label">${best.w?fmtDate(best.w.date):''}</div></div>
+    <div class="card"><div style="font-size:20px;margin-bottom:2px">🎯</div><div class="card-title">Types séance</div><div class="card-value">${d.programs.reduce((t,p)=>t+p.sessions.length,0)}</div><div class="card-label">dans les programmes</div></div>
+  </div>`
+
+  // Monthly volume chart
+  html+=`<div class="chart-card"><div class="card-title">Volume par mois</div><canvas id="ch-vol-month"></canvas>
+    <div class="chart-desc">Volume total soulevé chaque mois. Une tendance à la hausse indique une progression continue.</div></div>`
+
+  // Last sessions mini-table
+  if(lastW){
+    html+=`<div class="card"><div class="card-title">Dernières séances</div><table>
+      <tr><th>Date</th><th>Session</th><th>Volume</th><th>Durée</th><th>RPE</th></tr>`
+    const recent=[...d.workouts].reverse().slice(0,10)
+    for(const w of recent){
+      const s=getSeshByDate(d,w)
+      html+=`<tr class="session-row" onclick="showSessionDetail('${w.id}')">
+        <td>${fmtDate(w.date)}</td>
+        <td><span class="badge ${getSessionColorClass(w.sessionId,[].concat(...d.programs.map(p=>p.sessions)))}">${w.sessionId}</span> ${s.name}</td>
+        <td>${calcVol(w)} kg</td>
+        <td>${w.duration?fmtDur(w.duration):'-'}</td>
+        <td>${w.exercises.filter(e=>e.rpe>0).length?Math.round(w.exercises.reduce((t,e)=>t+(e.rpe||0),0)/w.exercises.filter(e=>e.rpe>0).length)+'/10':'-'}</td>
+      </tr>`
+    }
+    html+=`</table></div>`
+  } else {
+    html+=`<div class="empty-state"><p>Aucune séance enregistrée. Importe des données ou commence sur l'app mobile.</p></div>`
+  }
+
+  v.innerHTML=html
+  drawVolumeByMonth()
+}
+
+function drawVolumeByMonth(){
+  const c=document.getElementById('ch-vol-month')
+  if(!c)return
+  const ctx=c.getContext('2d')
+  const rect=c.parentElement.getBoundingClientRect()
+  c.width=rect.width-32;c.height=280
+
+  const W=c.width,H=c.height,pad={t:20,b:30,l:50,r:20}
+  const months={}
+  for(const w of appData.workouts){
+    const d=parseLocalDate(w.date),k=d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')
+    months[k]=(months[k]||0)+calcVol(w)
+  }
+  const keys=Object.keys(months).sort()
+  if(!keys.length)return
+
+  const maxV=Math.max(...Object.values(months),1)
+  const gw=W-pad.l-pad.r,gh=H-pad.t-pad.b
+  const bw=Math.max(8,Math.min(60,gw/keys.length-4))
+
+  ctx.clearRect(0,0,W,H)
+  ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text-3').trim()||'#6b696e'
+  ctx.font='13px system-ui';ctx.textAlign='center'
+  keys.forEach((k,i)=>{
+    const x=pad.l+gw*i/keys.length+gw/keys.length/2
+    const h=(months[k]/maxV)*gh
+    const grad=ctx.createLinearGradient(0,pad.t+gh-h,0,pad.t+gh)
+    grad.addColorStop(0,'#eab308');grad.addColorStop(1,'rgba(234,179,8,0.3)')
+    ctx.fillStyle=grad
+    ctx.beginPath()
+    ctx.roundRect(x-bw/2,pad.t+gh-h,bw,h,4)
+    ctx.fill()
+    ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text-2').trim()||'#949296'
+    ctx.font='12px system-ui'
+    ctx.fillText(k.slice(5)+'/'+k.slice(2,4),x,H-6)
+  })
+  // Y axis
+  ctx.textAlign='right'
+  for(let i=0;i<=4;i++){
+    const v=maxV*i/4,y=pad.t+gh-gh*i/4
+    ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--border').trim()||'rgba(255,255,255,0.07)'
+    ctx.fillRect(pad.l,y,gw,1)
+    ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text-3').trim()||'#6b696e'
+    ctx.font='12px system-ui'
+    ctx.fillText(Math.round(v).toLocaleString(),pad.l-8,y+4)
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SESSIONS VIEW
+// ═══════════════════════════════════════════════════════════════════
+
+function renderSessions(){
+  const v=document.getElementById('view-sessions')
+  const d=appData
+  let html=`<div class="page-header"><div>
+    <h1 class="page-title">Séances</h1>
+    <div class="page-subtitle">${d.workouts.length} séances enregistrées</div>
+  </div></div>`
+
+  // Filter bar
+  const months=[...new Set(d.workouts.map(w=>w.date.slice(0,7)))].sort().reverse()
+  const sessionTypes=[...new Set(d.workouts.map(w=>w.sessionId))]
+  const allSessions=d.programs.flatMap(p=>p.sessions)
+  html+=`<div class="filter-bar">
+    <select class="input" style="width:auto;padding:8px 12px" id="f-month" onchange="renderSessionList()">
+      <option value="">Tous les mois</option>
+      ${months.map(m=>`<option value="${m}">${m}</option>`).join('')}
+    </select>
+    <select class="input" style="width:auto;padding:8px 12px" id="f-type" onchange="renderSessionList()">
+      <option value="">Tous les types</option>
+      ${sessionTypes.map(t=>{const sesh=allSessions.find(s=>s.id===t);return `<option value="${t}">${sesh?esc(sesh.name):t}</option>`}).join('')}
+    </select>
+  </div>
+  <div id="session-list"></div>`
+  v.innerHTML=html
+  renderSessionList()
+}
+
+function renderSessionList(){
+  const el=document.getElementById('session-list')
+  if(!el)return
+  const d=appData
+  const month=document.getElementById('f-month')?.value||''
+  const type=document.getElementById('f-type')?.value||''
+  let list=[...d.workouts]
+  if(month)list=list.filter(w=>w.date.startsWith(month))
+  if(type)list=list.filter(w=>w.sessionId===type)
+  list.sort((a,b)=>parseLocalDate(b.date)-parseLocalDate(a.date))
+
+  if(!list.length){el.innerHTML='<div class="empty-state"><p>Aucune séance trouvée</p></div>';return}
+  let html=`<table><tr><th>Date</th><th>Session</th><th>Exercices</th><th>Volume</th><th>Durée</th><th>RPE</th></tr>`
+  for(const w of list){
+    const s=getSeshByDate(d,w)
+    const rpe=w.exercises.filter(e=>e.rpe>0)
+    const rpeAvg=rpe.length?Math.round(rpe.reduce((t,e)=>t+(e.rpe||0),0)/rpe.length):0
+    html+=`<tr class="session-row" onclick="showSessionDetail('${w.id}')">
+      <td>${fmtDate(w.date)}</td>
+      <td><span class="badge ${getSessionColorClass(w.sessionId,[].concat(...d.programs.map(p=>p.sessions)))}">${w.sessionId}</span></td>
+      <td>${w.exercises.filter(e=>e.sets.length).length}</td>
+      <td>${calcVol(w)} kg</td>
+      <td>${w.duration?fmtDur(w.duration):'-'}</td>
+      <td>${rpeAvg?'<span class="badge badge-accent">'+rpeAvg+'/10</span>':'-'}</td>
+    </tr>`
+  }
+  html+=`</table>`
+  el.innerHTML=html
+}
+
+function showSessionDetail(id){
+  const w=appData.workouts.find(x=>x.id===id)
+  if(!w)return
+  const s=getSeshByDate(appData,w)
+  const vol=calcVol(w)
+  const rpeAvg=w.exercises.filter(e=>e.rpe>0)
+  const avg=rpeAvg.length?Math.round(rpeAvg.reduce((t,e)=>t+(e.rpe||0),0)/rpeAvg.length):0
+
+  let html=`<div class="modal-title">Séance ${w.sessionId} · ${fmtDate(w.date)}</div>
+    <div style="display:flex;gap:16px;margin-bottom:20px;font-size:13px;color:var(--text-2)">
+      <span>Volume: ${vol} kg</span>
+      <span>Durée: ${w.duration?fmtDur(w.duration):'-'}</span>
+      ${avg?'<span>RPE: '+avg+'/10</span>':''}
+    </div>`
+  for(const ex of w.exercises){
+    const def=s.exercises.find(e=>e.id===ex.exerciseId)
+    if(!ex.sets.length)continue
+    html+=`<div class="exercise-block">
+      <div class="exercise-block-name">${esc(def?def.name:ex.exerciseId)}</div>
+      <div class="exercise-block-sets">${ex.sets.map(st=>st.reps+'×'+displayWeight(st.weight,def?def.targetWeight===0:false)).join(' · ')}</div>
+      <div class="exercise-block-meta">
+        ${ex.rpe>0?'<span class="badge badge-accent">RPE '+ex.rpe+'</span>':''}
+        ${ex.notes?'<span class="text-3">📝 '+esc(ex.notes)+'</span>':''}
+      </div>
+    </div>`
+    // Compare with previous
+    const prev=getLastEx(appData,ex.exerciseId)
+    if(prev&&prev!==ex){
+      const prevVol=prev.sets.reduce((t,st)=>t+(st.reps||0)*(st.weight||0),0)
+      const curVol=ex.sets.reduce((t,st)=>t+(st.reps||0)*(st.weight||0),0)
+      if(prevVol!==curVol){
+        const delta=curVol-prevVol
+        html+=`<div style="font-size:12px;color:${delta>0?'var(--success)':'var(--text-3)'}">${delta>0?'▲':'▼'} ${Math.abs(delta)} kg vs dernière fois</div>`
+      }
+    }
+  }
+  html+=`<div class="modal-actions">
+    <button class="btn btn-danger" onclick="hideModal();deleteWorkout('${id}')">🗑 Supprimer</button>
+    <button class="btn btn-secondary" onclick="hideModal()">Fermer</button>
+    <button class="btn btn-primary" onclick="hideModal();editWorkout('${id}')">Modifier</button>
+  </div>`
+  showModal(html,'modal-lg')
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  PROGRAM VIEW
+// ═══════════════════════════════════════════════════════════════════
+
+let _activeProgramIdx=0
+
+function renderProgram(){
+  const v=document.getElementById('view-program')
+  const d=appData
+  if(!d.programs.length)d.programs=[deepClone(d.program)]
+  _activeProgramIdx=Math.min(_activeProgramIdx,d.programs.length-1)
+  const active=d.programs[_activeProgramIdx]||d.programs[0]
+
+  let html=`<div class="page-header"><div>
+    <h1 class="page-title">Programme</h1>
+    <div class="page-subtitle">${active.sessions.length} types de séance</div>
+  </div><div class="page-actions">
+    <button class="btn btn-sm btn-secondary" onclick="showAddProgram()">+ Programme</button>
+    <button class="btn btn-primary" onclick="showAddSesh()">+ Séance</button>
+    ${d.programs.length>1?`<button class="btn btn-sm btn-danger" onclick="deleteProgram()">✕ Supprimer</button>`:''}
+  </div></div>`
+
+  // Program tabs
+  if(d.programs.length>1){
+    html+=`<div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">`
+    d.programs.forEach((p,i)=>{
+      html+=`<button class="btn btn-sm ${i===_activeProgramIdx?'btn-primary':'btn-secondary'}" onclick="_activeProgramIdx=${i};renderProgram()">${esc(p.name)}</button>`
+    })
+    html+=`</div>`
+  }
+
+  html+=`<div class="card" style="margin-bottom:20px">
+    <div class="input-group" style="margin:0">
+      <label class="input-label">Nom du programme</label>
+      <input class="input" value="${esc(active.name)}" onchange="active.name=this.value;if(d.programs[0])d.program.name=this.value;saveDataFile();storeBackup()" style="font-size:16px;font-weight:700">
+    </div>
+  </div>`
+
+  for(const s of active.sessions){
+    html+=`<div class="card session-card">
+      <div class="session-card-header">
+        <div><span class="badge ${getSessionColorClass(s.id,active.sessions)}">Séance ${s.id}</span>
+        <span style="font-weight:600;margin-left:8px;font-size:16px">${esc(s.name)}</span></div>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-sm btn-secondary" onclick="showAddEx('${esc(s.id)}')">+ Ex.</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteSession('${esc(s.id)}')">✕ Supprimer</button>
+        </div>
+      </div>`
+    for(const e of s.exercises){
+      const last=getLastEx(appData,e.id)
+      const lastVol=last?last.sets.reduce((t,st)=>t+(st.reps||0)*(st.weight||0),0):0
+      html+=`<div class="program-exercise" onclick="editEx('${esc(s.id)}','${esc(e.id)}')">
+        <div class="program-exercise-info">
+          <div class="program-exercise-name">${esc(e.name)}</div>
+          <div class="program-exercise-targets">
+            <span class="tg tg-reps">${e.targetSets}×${e.targetReps}</span>
+            <span class="tg tg-weight">${displayWeight(e.targetWeight,true)}</span>
+            <span class="tg tg-rest">${e.restSec}s repos</span>
+          </div>
+          ${last?`<div class="program-exercise-last">Dernier: ${lastVol} kg${last.rpe?' · RPE '+last.rpe:''}</div>`:''}
+        </div>
+        <button class="btn btn-sm btn-danger" style="margin-top:2px;flex-shrink:0" onclick="event.stopPropagation();deleteExercise('${esc(s.id)}','${esc(e.id)}')">✕</button>
+      </div>`
+    }
+    html+=`</div>`
+  }
+
+  if(!active.sessions.length){
+    html+=`<div class="empty-state"><p>Aucune séance définie</p><button class="btn btn-primary mt-16" onclick="showAddSesh()">Ajouter une séance</button></div>`
+  }
+
+  // Action buttons
+  html+=`<div style="display:flex;gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap">
+    <button class="btn btn-sm btn-secondary" onclick="switchView('planning')">📅 Planning</button>
+    <button class="btn btn-sm btn-secondary" onclick="showExLib()">📚 Bibliothèque (${d.exerciseLibrary.length})</button>
+  </div>`
+
+  // Sync appData.program with first program for dashboard/streak compatibility
+  if(d.programs.length>0){
+    const first=d.programs[0]
+    d.program.name=first.name
+    d.program.sessions=first.sessions
+    d.program.schedule=first.schedule
+  }
+  v.innerHTML=html
+}
+
+function renderPlanning(){
+  const d=appData
+  const v=document.getElementById('view-planning')
+  // Collect active program's schedule
+  const active=d.programs[_activeProgramIdx]||d.programs[0]
+  let html=`<div class="page-header"><div>
+    <h1 class="page-title">📅 Planning</h1>
+    <div class="page-subtitle">Calendrier 2 semaines + modèle hebdomadaire — clique sur un jour pour le personnaliser</div>
+  </div></div>
+  <div class="card"><div class="card-title">Calendrier</div>
+    <div class="text-3" style="font-size:12px;margin-bottom:12px">Clique sur un jour pour assigner un programme ou le marquer comme repos.</div>
+    <div id="cal-container"></div>
+  </div>
+  <div class="card"><div class="card-title">Configuration du schedule</div>
+    <div class="input-group" style="margin-bottom:12px">
+      <label class="input-label">Programme actif</label>
+      <select class="input" id="sched-prog-select" onchange="switchSchedProgram(this.value)">
+        ${d.programs.map((p,i)=>`<option value="${i}"${i===_activeProgramIdx?' selected':''}>${esc(p.name)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="input-group" style="margin-bottom:12px">
+      <label class="input-label">Type</label>
+      <select class="input" onchange="saveSchedType(this.value)">
+        <option value="rotation"${active.schedule.type==='rotation'?' selected':''}>Rotation</option>
+        <option value="weekly"${active.schedule.type==='weekly'?' selected':''}>Hebdomadaire</option>
+      </select>
+    </div>
+    <div class="input-group" style="margin-bottom:12px">
+      <label class="input-label">Ordre des séances (IDs séparés par des virgules)</label>
+      <input class="input" value="${active.schedule.order.join(',')}" onchange="saveSchedOrder(this.value)" placeholder="A,B,C">
+    </div>
+    <div id="sched-days-cfg">${renderSchedDaysCfg(active)}</div>
+  </div>`
+  v.innerHTML=html
+  renderPlanningCalendar(document.getElementById('cal-container'))
+}
+
+function switchSchedProgram(idx){
+  _activeProgramIdx=parseInt(idx)
+  renderPlanning()
+}
+
+function saveSchedType(val){
+  const active=appData.programs[_activeProgramIdx]||appData.programs[0]
+  active.schedule.type=val
+  saveDataFile();storeBackup();renderPlanning()
+}
+
+function saveSchedOrder(val){
+  const active=appData.programs[_activeProgramIdx]||appData.programs[0]
+  active.schedule.order=val.split(',').map(s=>s.trim().toUpperCase()).filter(Boolean)
+  saveDataFile();storeBackup();renderPlanning()
+}
+
+function renderSchedDaysCfg(prog){
+  if(prog.schedule.type!=='weekly')return'<div class="text-3" style="font-size:12px">Mode rotation : l\'ordre détermine la prochaine séance automatiquement.</div>'
+  const dayNames=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam']
+  let html='<label class="input-label">Jours d\'entraînement</label><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">'
+  for(let i=0;i<7;i++){
+    const active=prog.schedule.daysOfWeek.includes(i)
+    html+=`<button class="btn btn-sm ${active?'btn-primary':'btn-secondary'}" onclick="${active?`removeSchedDay(${i})`:`addSchedDay(${i})`}" style="flex:1;min-width:40px">${dayNames[i]}</button>`
+  }
+  html+='</div>'
+  return html
+}
+
+function addSchedDay(day){
+  const active=appData.programs[_activeProgramIdx]||appData.programs[0]
+  if(!active.schedule.daysOfWeek.includes(day))active.schedule.daysOfWeek.push(day)
+  active.schedule.daysOfWeek.sort((a,b)=>a-b)
+  saveDataFile();storeBackup();renderPlanning()
+}
+
+function removeSchedDay(day){
+  const active=appData.programs[_activeProgramIdx]||appData.programs[0]
+  active.schedule.daysOfWeek=active.schedule.daysOfWeek.filter(d=>d!==day)
+  saveDataFile();storeBackup();renderPlanning()
+}
+
+function showAddProgram(){
+  showModal(`<div class="modal-title">Nouveau programme</div>
+    <div class="input-group"><label class="input-label">Nom</label><input class="input" id="prog-name" placeholder="Force, Hypertrophie, Push/Pull..."></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="hideModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="addProgram()">Créer</button>
+    </div>`)
+}
+function addProgram(){
+  const name=document.getElementById('prog-name').value.trim()||'Programme '+(appData.programs.length+1)
+  appData.programs.push({name,sessions:[],schedule:{type:'rotation',order:[],daysOfWeek:[]}})
+  _activeProgramIdx=appData.programs.length-1
+  hideModal();saveDataFile();storeBackup();renderProgram()
+}
+function deleteProgram(){
+  const d=appData
+  if(d.programs.length<=1){toast('Impossible de supprimer le dernier programme','error');return}
+  const name=d.programs[_activeProgramIdx].name
+  if(!confirm('Supprimer le programme "'+name+'" ? Les séances de travail restent.'))return
+  d.programs.splice(_activeProgramIdx,1)
+  // Clean orphaned schedule entries
+  for(const key of Object.keys(d.scheduleGrid||{})){
+    if(d.scheduleGrid[key].progName===name)delete d.scheduleGrid[key]
+  }
+  for(const key of Object.keys(d.scheduleTemplate||{})){
+    if(d.scheduleTemplate[key].progName===name)delete d.scheduleTemplate[key]
+  }
+  _activeProgramIdx=Math.min(_activeProgramIdx,d.programs.length-1)
+  if(d.programs.length>0){d.program.name=d.programs[0].name;d.program.sessions=d.programs[0].sessions;d.program.schedule=d.programs[0].schedule}
+  saveDataFile();storeBackup();renderProgram()
+  toast('Programme supprimé','success')
+}
+
+function deleteSession(sid){
+  const d=appData
+  const active=d.programs[_activeProgramIdx]
+  if(!active)return
+  const s=active.sessions.find(x=>x.id===sid)
+  if(!s||!confirm('Supprimer la séance '+s.id+' — '+s.name+' ?'))return
+  active.sessions=active.sessions.filter(x=>x.id!==sid)
+  if(d.programs[0])d.program.sessions=active.sessions
+  saveDataFile();storeBackup();renderProgram()
+}
+
+function deleteExercise(sid,eid){
+  const d=appData
+  const active=d.programs[_activeProgramIdx]
+  if(!active)return
+  const s=active.sessions.find(x=>x.id===sid)
+  if(!s)return
+  const e=s.exercises.find(x=>x.id===eid)
+  if(!e||!confirm('Supprimer '+e.name+' de la séance '+s.id+' ?'))return
+  s.exercises=s.exercises.filter(x=>x.id!==eid)
+  saveDataFile();storeBackup();renderProgram()
+}
+
+function deleteWorkout(id){
+  if(!confirm('Supprimer cette séance enregistrée ?'))return
+  appData.workouts=appData.workouts.filter(w=>w.id!==id)
+  saveDataFile();storeBackup();renderSessions()
+}
+
+function showAddSesh(){
+  showModal(`<div class="modal-title">Nouvelle séance</div>
+    <div class="input-group"><label class="input-label">ID</label><input class="input" id="sesh-id" placeholder="A, B, Push..." style="text-transform:uppercase"></div>
+    <div class="input-group"><label class="input-label">Nom</label><input class="input" id="sesh-name" placeholder="Tirage, Poussée..."></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="hideModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="addSesh()">Ajouter</button>
+    </div>`)
+}
+function addSesh(){
+  const raw=document.getElementById('sesh-id').value.trim().toUpperCase()
+  const id=raw.replace(/[^A-Z0-9_-]/g,'')
+  if(!id){toast('ID invalide (lettres, chiffres, - et _ seulement)','error');return}
+  const name=document.getElementById('sesh-name').value.trim()||id
+  const prog=appData.programs[_activeProgramIdx]||appData.programs[0]
+  if(!prog){toast('Aucun programme actif','error');return}
+  if(prog.sessions.find(s=>s.id===id)){toast('ID déjà utilisé','error');return}
+  prog.sessions.push({id,name,exercises:[]})
+  if(!prog.schedule.order.includes(id))prog.schedule.order.push(id)
+  if(_activeProgramIdx===0){appData.program.sessions=prog.sessions;appData.program.schedule.order=prog.schedule.order}
+  hideModal();saveDataFile();storeBackup();renderProgram()
+}
+
+function showAddEx(sid){
+  const d=appData
+  const libOpts=d.exerciseLibrary.map(l=>`<option value="${esc(l.name)}">${esc(l.name)}</option>`).join('')
+  showModal(`<div class="modal-title">Ajouter un exercice</div>
+    <div class="input-group">
+      <label class="input-label">Nom <span class="text-3" style="font-weight:400">(tape ou choisis dans la bibliothèque)</span></label>
+      <input class="input" id="ex-name" list="ex-lib-add" placeholder="Développé couché, Tractions...">
+      <datalist id="ex-lib-add">${libOpts}</datalist>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div class="input-group" style="flex:1"><label class="input-label">Séries</label><input class="input" id="ex-sets" type="number" min="1" value="4"></div>
+      <div class="input-group" style="flex:1"><label class="input-label">Reps</label><input class="input" id="ex-reps" placeholder="5 ou 6-8"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div class="input-group" style="flex:1"><label class="input-label">Charge (kg)</label><input class="input" id="ex-weight" type="number" min="0" step="0.25" value="0"></div>
+      <div class="input-group" style="flex:1"><label class="input-label">Repos (sec)</label><input class="input" id="ex-rest" type="number" min="0" step="15" value="180"></div>
+    </div>
+    <div class="input-group"><label class="input-label">Note</label><textarea class="input" id="ex-notes"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="hideModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="addEx('${sid}')">Ajouter</button>
+    </div>`)
+}
+function addEx(sid){
+  const name=document.getElementById('ex-name').value.trim()
+  if(!name){toast('Nom requis','error');return}
+  const prog=appData.programs[_activeProgramIdx]||appData.programs[0]
+  const s=prog?prog.sessions.find(x=>x.id===sid):null
+  if(!s)return
+  // Reuse existing library entry if same name exists
+  let lib=appData.exerciseLibrary.find(x=>x.name.toLowerCase()===name.toLowerCase())
+  const eid=lib?lib.id:genId()
+  if(!lib){
+    appData.exerciseLibrary.push({id:eid,name})
+  }
+  s.exercises.push({
+    id:eid,name,
+    targetSets:parseInt(document.getElementById('ex-sets').value)||4,
+    targetReps:document.getElementById('ex-reps').value.trim()||'10',
+    targetWeight:parseFloat(document.getElementById('ex-weight').value)||0,
+    restSec:parseInt(document.getElementById('ex-rest').value)||180,
+    notes:document.getElementById('ex-notes').value.trim()
+  })
+  hideModal();saveDataFile();storeBackup();renderProgram()
+}
+
+function showExLib(){
+  const d=appData
+  const exUsage={}
+  for(const w of d.workouts){
+    for(const ex of w.exercises){
+      exUsage[ex.exerciseId]=(exUsage[ex.exerciseId]||0)+1
+    }
+  }
+  let items=''
+  for(const lib of d.exerciseLibrary){
+    const count=exUsage[lib.id]||0
+    items+=`<div class="ex-lib-item" onclick="renameExLibModal('${esc(lib.id)}')">
+      <div class="ex-lib-name">${esc(lib.name)}</div>
+      <div class="ex-lib-count">${count}×</div>
+    </div>`
+  }
+  if(!items)items='<div class="text-3" style="padding:12px;text-align:center">Aucun exercice dans la bibliothèque</div>'
+  showModal(`<div class="modal-title">📚 Bibliothèque d'exercices (${d.exerciseLibrary.length})</div>
+    <div class="text-2" style="font-size:13px;margin-bottom:12px">Clique sur un nom pour le renommer.</div>
+    <input class="input" style="margin-bottom:10px;padding:8px 10px;font-size:13px" placeholder="Rechercher..." oninput="filterExLibModal(this.value)">
+    <div id="ex-lib-modal-list" style="max-height:300px;overflow-y:auto">${items}</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="hideModal()">Fermer</button>
+    </div>`,
+    'modal-lg')
+}
+
+function filterExLibModal(val){
+  const el=document.getElementById('ex-lib-modal-list')
+  if(!el)return
+  const d=appData
+  const f=(val||'').toLowerCase()
+  const exUsage={}
+  for(const w of d.workouts)for(const ex of w.exercises)exUsage[ex.exerciseId]=(exUsage[ex.exerciseId]||0)+1
+  let html=''
+  for(const lib of d.exerciseLibrary){
+    if(f&&!lib.name.toLowerCase().includes(f))continue
+    html+=`<div class="ex-lib-item" onclick="renameExLibModal('${esc(lib.id)}')">
+      <div class="ex-lib-name">${esc(lib.name)}</div>
+      <div class="ex-lib-count">${exUsage[lib.id]||0}×</div>
+    </div>`
+  }
+  if(!html)html='<div class="text-3" style="padding:12px;text-align:center">Aucun exercice</div>'
+  el.innerHTML=html
+}
+
+function renameExLibModal(id){
+  const d=appData
+  const lib=d.exerciseLibrary.find(x=>x.id===id)
+  if(!lib)return
+  const newName=prompt('Renommer l\'exercice :',lib.name)
+  if(newName&&newName.trim()&&newName.trim()!==lib.name){
+    lib.name=newName.trim()
+    for(const p of d.programs)for(const s of p.sessions)for(const e of s.exercises)if(e.id===id)e.name=newName.trim()
+    saveDataFile();storeBackup()
+    showExLib() // Re-render modal
+  }
+}
+
+function editEx(sid,eid){
+  const prog=appData.programs[_activeProgramIdx]||appData.programs[0]
+  const s=prog?prog.sessions.find(x=>x.id===sid):null
+  if(!s)return
+  const e=s.exercises.find(x=>x.id===eid)
+  if(!e)return
+  showModal(`<div class="modal-title">Modifier l'exercice</div>
+    <div class="input-group"><label class="input-label">Nom</label><input class="input" id="ex-name" value="${esc(e.name)}"></div>
+    <div style="display:flex;gap:8px">
+      <div class="input-group" style="flex:1"><label class="input-label">Séries</label><input class="input" id="ex-sets" type="number" min="1" value="${e.targetSets}"></div>
+      <div class="input-group" style="flex:1"><label class="input-label">Reps</label><input class="input" id="ex-reps" value="${esc(e.targetReps)}"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div class="input-group" style="flex:1"><label class="input-label">Charge (kg)</label><input class="input" id="ex-weight" type="number" min="0" step="0.25" value="${e.targetWeight}"></div>
+      <div class="input-group" style="flex:1"><label class="input-label">Repos (sec)</label><input class="input" id="ex-rest" type="number" min="0" step="15" value="${e.restSec}"></div>
+    </div>
+    <div class="input-group"><label class="input-label">Note</label><textarea class="input" id="ex-notes">${esc(e.notes||'')}</textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="hideModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveEx('${sid}','${eid}')">Sauvegarder</button>
+    </div>`)
+}
+function saveEx(sid,eid){
+  const prog=appData.programs[_activeProgramIdx]||appData.programs[0]
+  const s=prog?prog.sessions.find(x=>x.id===sid):null
+  if(!s)return
+  const e=s.exercises.find(x=>x.id===eid)
+  if(!e)return
+  e.name=document.getElementById('ex-name').value.trim()||e.name
+  e.targetSets=parseInt(document.getElementById('ex-sets').value)||e.targetSets
+  e.targetReps=document.getElementById('ex-reps').value.trim()||e.targetReps
+  e.targetWeight=parseFloat(document.getElementById('ex-weight').value)||0
+  e.restSec=parseInt(document.getElementById('ex-rest').value)||e.restSec
+  e.notes=document.getElementById('ex-notes').value.trim()
+  // Update exercise library
+  const libEntry=appData.exerciseLibrary.find(x=>x.id===eid)
+  if(libEntry)libEntry.name=e.name
+  hideModal();saveDataFile();storeBackup();renderProgram()
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  CHARTS VIEW
+// ═══════════════════════════════════════════════════════════════════
+
+function renderCharts(){
+  const v=document.getElementById('view-charts')
+  const d=appData
+  const exNames=[...new Set(d.workouts.flatMap(w=>w.exercises.filter(e=>e.sets.length).map(e=>{
+    const s=getSeshByDate(d,w)
+    const def=s.exercises.find(x=>x.id===e.exerciseId)
+    return def?def.name:e.exerciseId
+  })))]
+
+  let html=`<div class="page-header"><div>
+    <h1 class="page-title">Graphiques</h1>
+    <div class="page-subtitle">Analyse de la progression</div>
+  </div></div>`
+
+  if(!d.workouts.length){
+    v.innerHTML=html+`<div class="empty-state"><p>Pas assez de données pour les graphiques</p></div>`
+    return
+  }
+
+  // Chart 1: Weight progression
+  html+=`<div class="chart-grid">
+    <div class="chart-card"><div class="card-title">Progression charge</div>
+      <select class="input" id="ch-ex-select" style="margin-bottom:8px;padding:6px 10px;font-size:13px" onchange="drawWeightChart()">
+        ${exNames.map((n,i)=>`<option value="${i}">${n}</option>`).join('')}
+      </select>
+      <canvas id="ch-weight"></canvas>
+      <div class="chart-desc">Évolution de la charge maximale utilisée pour l'exercice sélectionné. Une courbe ascendante = progression.</div>
+    </div>
+    <div class="chart-card"><div class="card-title">Volume par séance</div><canvas id="ch-volume"></canvas>
+      <div class="chart-desc">Volume total (reps × charge) par séance. Permet de visualiser l'intensité globale de chaque entraînement.</div>
+    </div>
+    <div class="chart-card"><div class="card-title">RPE trend</div><canvas id="ch-rpe"></canvas>
+      <div class="chart-desc">Moyenne du RPE (effort perçu) par séance. Un RPE stable ou en baisse avec des charges en hausse = adaptation réussie.</div>
+    </div>
+    <div class="chart-card"><div class="card-title">Comparaison A/B</div><canvas id="ch-compare"></canvas>
+      <div class="chart-desc">Volume moyen par type de séance. Utile pour vérifier l'équilibre entre les différents entraînements.</div>
+    </div>
+  </div>`
+
+  html+=`<div class="chart-card"><div class="card-title">1RM estimé par exercice</div>
+    <div id="ch-1rm" style="overflow-x:auto"></div>
+    <div class="chart-desc">Estimation de la répétition maximale (formule d'Epley). Charge que tu pourrais soulever pour 1 rep max théorique.</div>
+  </div>`
+
+  v.innerHTML=html
+  requestAnimationFrame(()=>{
+    drawWeightChart();drawVolumeChart();drawRpeChart();drawCompareChart();draw1rmTable()
+  })
+}
+
+function drawWeightChart(){
+  const c=document.getElementById('ch-weight');if(!c)return
+  const ctx=c.getContext('2d')
+  const idx=parseInt(document.getElementById('ch-ex-select')?.value||0)
+  const d=appData
+  const allExNames=[...new Set(d.workouts.flatMap(w=>w.exercises.filter(e=>e.sets.length).map(e=>{
+    const s=getSeshByDate(d,w);const def=s.exercises.find(x=>x.id===e.exerciseId)
+    return def?def.name:e.exerciseId
+  })))]
+  const targetName=allExNames[idx]
+  if(!targetName)return
+
+  // Find data points: max weight per workout for this exercise
+  const pts=[]
+  for(const w of d.workouts){
+    for(const e of w.exercises){
+      const s=getSeshByDate(d,w);const def=s.exercises.find(x=>x.id===e.exerciseId)
+      const name=def?def.name:e.exerciseId
+      if(name===targetName&&e.sets.length){
+        const maxW=Math.max(...e.sets.map(st=>st.weight||0))
+        const maxVol=Math.max(...e.sets.map(st=>(st.reps||0)*(st.weight||0)))
+        pts.push({date:parseLocalDate(w.date),weight:maxW,vol:maxVol})
+      }
+    }
+  }
+  pts.sort((a,b)=>a.date-b.date)
+  if(!pts.length){ctx.clearRect(0,0,c.width,c.height);return}
+
+  const rect=c.parentElement.getBoundingClientRect()
+  c.width=rect.width-32;c.height=280
+  const W=c.width,H=c.height,pad={t:20,b:30,l:50,r:20}
+  const gw=W-pad.l-pad.r,gh=H-pad.t-pad.b
+  const maxW=Math.max(...pts.map(p=>p.weight),1)*1.2
+  ctx.clearRect(0,0,W,H)
+
+  // Grid
+  ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--border').trim()||'rgba(255,255,255,0.07)'
+  ctx.lineWidth=1
+  for(let i=0;i<=4;i++){
+    const y=pad.t+gh-gh*i/4
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+gw,y);ctx.stroke()
+    ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text-3').trim()||'#6b696e'
+    ctx.font='12px system-ui';ctx.textAlign='right'
+    ctx.fillText(Math.round(maxW*i/4)+'kg',pad.l-8,y+4)
+  }
+
+  // Line
+  if(pts.length>1){
+    ctx.beginPath()
+    pts.forEach((p,i)=>{
+      const x=pad.l+gw*i/(pts.length-1)
+      const y=pad.t+gh-(p.weight/maxW)*gh
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)
+    })
+    ctx.strokeStyle='#eab308';ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.stroke()
+
+    // Dots
+    pts.forEach((p,i)=>{
+      const x=pad.l+gw*i/(pts.length-1)
+      const y=pad.t+gh-(p.weight/maxW)*gh
+      ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2)
+      ctx.fillStyle='#eab308';ctx.fill()
+    })
+  } else {
+    const x=pad.l+gw/2,y=pad.t+gh/2
+    ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2)
+    ctx.fillStyle='#eab308';ctx.fill()
+    ctx.fillStyle='#eab308';ctx.textAlign='center';ctx.font='bold 13px system-ui'
+    ctx.fillText(pts[0].weight+'kg',x,y+20)
+  }
+
+  // Labels
+  ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text-2').trim()||'#949296'
+  ctx.font='11px system-ui';ctx.textAlign='center'
+  pts.forEach((p,i)=>{
+    const x=pad.l+gw*i/(pts.length-1)
+    ctx.fillText(p.date.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}),x,H-6)
+  })
+}
+
+function drawVolumeChart(){
+  const c=document.getElementById('ch-volume');if(!c)return
+  const ctx=c.getContext('2d')
+  const d=appData
+  if(!d.workouts.length)return
+  const rect=c.parentElement.getBoundingClientRect()
+  c.width=rect.width-32;c.height=280
+  const W=c.width,H=c.height,pad={t:20,b:30,l:50,r:20}
+  const gw=W-pad.l-pad.r,gh=H-pad.t-pad.b
+  const list=[...d.workouts].sort((a,b)=>parseLocalDate(a.date)-parseLocalDate(b.date))
+  const vols=list.map(w=>({date:parseLocalDate(w.date),v:calcVol(w)}))
+  const maxV=Math.max(...vols.map(p=>p.v),1)*1.15
+
+  ctx.clearRect(0,0,W,H)
+  // Grid
+  const text3=getComputedStyle(document.documentElement).getPropertyValue('--text-3').trim()||'#6b696e'
+  const border=getComputedStyle(document.documentElement).getPropertyValue('--border').trim()||'rgba(255,255,255,0.07)'
+  ctx.strokeStyle=border;ctx.lineWidth=1
+  for(let i=0;i<=4;i++){
+    const y=pad.t+gh-gh*i/4
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+gw,y);ctx.stroke()
+    ctx.fillStyle=text3;ctx.font='12px system-ui';ctx.textAlign='right'
+    ctx.fillText(Math.round(maxV*i/4).toLocaleString(),pad.l-8,y+4)
+  }
+
+  const bw=Math.max(2,Math.min(40,gw/list.length-2))
+  vols.forEach((p,i)=>{
+    const x=pad.l+gw*i/(list.length-1)-bw/2
+    const h=(p.v/maxV)*gh
+    const grad=ctx.createLinearGradient(0,pad.t+gh-h,0,pad.t+gh)
+    grad.addColorStop(0,'#3b82f6');grad.addColorStop(1,'rgba(59,130,246,0.3)')
+    ctx.fillStyle=grad
+    ctx.beginPath();ctx.roundRect(x,pad.t+gh-h,bw,h,3);ctx.fill()
+    if(i%Math.max(1,Math.floor(list.length/8))===0){
+      ctx.fillStyle=text3;ctx.font='11px system-ui';ctx.textAlign='center'
+      ctx.fillText(p.date.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}),x+bw/2,H-6)
+    }
+  })
+}
+
+function drawRpeChart(){
+  const c=document.getElementById('ch-rpe');if(!c)return
+  const ctx=c.getContext('2d')
+  const d=appData
+  const pts=d.workouts.filter(w=>w.exercises.some(e=>e.rpe>0)).map(w=>{
+    const rpes=w.exercises.filter(e=>e.rpe>0)
+    return {date:parseLocalDate(w.date),rpe:rpes.reduce((t,e)=>t+(e.rpe||0),0)/rpes.length}
+  })
+  if(!pts.length){ctx.clearRect(0,0,c.width,c.height);return}
+
+  const rect=c.parentElement.getBoundingClientRect()
+  c.width=rect.width-32;c.height=280
+  const W=c.width,H=c.height,pad={t:20,b:30,l:35,r:20}
+  const gw=W-pad.l-pad.r,gh=H-pad.t-pad.b
+  const t3=getComputedStyle(document.documentElement).getPropertyValue('--text-3').trim()||'#6b696e'
+  const bd=getComputedStyle(document.documentElement).getPropertyValue('--border').trim()||'rgba(255,255,255,0.07)'
+  ctx.clearRect(0,0,W,H)
+  ctx.strokeStyle=bd;ctx.lineWidth=1
+  for(let i=0;i<=10;i+=2){
+    const y=pad.t+gh-gh*i/10
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+gw,y);ctx.stroke()
+    ctx.fillStyle=t3;ctx.font='12px system-ui';ctx.textAlign='right'
+    ctx.fillText(i,pad.l-8,y+4)
+  }
+
+  // Moving average
+  if(pts.length>1){
+    ctx.beginPath()
+    pts.forEach((p,i)=>{
+      const x=pad.l+gw*i/(pts.length-1)
+      const y=pad.t+gh-(p.rpe/10)*gh
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)
+    })
+    ctx.strokeStyle='#22c55e';ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.stroke()
+    pts.forEach((p,i)=>{
+      const x=pad.l+gw*i/(pts.length-1)
+      const y=pad.t+gh-(p.rpe/10)*gh
+      ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2)
+      ctx.fillStyle='#22c55e';ctx.fill()
+    })
+    ctx.fillStyle=t3;ctx.font='11px system-ui';ctx.textAlign='center'
+    if(pts[0])ctx.fillText(pts[0].date.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}),pad.l,H-6)
+    if(pts.length>1)ctx.fillText(pts[pts.length-1].date.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}),pad.l+gw,H-6)
+  }
+}
+
+function drawCompareChart(){
+  const c=document.getElementById('ch-compare');if(!c)return
+  const ctx=c.getContext('2d')
+  const d=appData
+  const rect=c.parentElement.getBoundingClientRect()
+  c.width=rect.width-32;c.height=280
+  const W=c.width,H=c.height,pad={t:20,b:40,l:45,r:20}
+  const gw=W-pad.l-pad.r,gh=H-pad.t-pad.b
+  const t3=getComputedStyle(document.documentElement).getPropertyValue('--text-3').trim()||'#6b696e'
+  ctx.clearRect(0,0,W,H)
+
+  const types=[...new Set(d.workouts.map(w=>w.sessionId))].slice(0,8)
+  if(!types.length)return
+  const data=types.map(t=>{
+    const ws=d.workouts.filter(w=>w.sessionId===t)
+    const avg=ws.length?ws.reduce((s,w)=>s+calcVol(w),0)/ws.length:0
+    const count=ws.length
+    return{type:t,avg,count}
+  })
+  const maxV=Math.max(...data.map(d=>d.avg),1)*1.2
+  const bw=Math.min(80,gw/data.length*0.6)
+
+  data.forEach((d,i)=>{
+    const x=pad.l+gw*(i+0.5)/data.length-bw/2
+    const h=(d.avg/maxV)*gh
+    const grad=ctx.createLinearGradient(0,pad.t+gh-h,0,pad.t+gh)
+    grad.addColorStop(0,['#3b82f6','#f97316','#22c55e','#eab308','#ef4444','#8b5cf6','#ec4899','#14b8a6'][i%8])
+    grad.addColorStop(1,['rgba(59,130,246,0.3)','rgba(249,115,22,0.3)','rgba(34,197,94,0.3)','rgba(234,179,8,0.3)','rgba(239,68,68,0.3)','rgba(139,92,246,0.3)','rgba(236,72,153,0.3)','rgba(20,184,166,0.3)'][i%8])
+    ctx.fillStyle=grad
+    ctx.beginPath();ctx.roundRect(x,pad.t+gh-h,bw,h,4);ctx.fill()
+    ctx.fillStyle=t3;ctx.font='12px system-ui';ctx.textAlign='center'
+    ctx.fillText('Séance '+d.type,x+bw/2,pad.t+gh+16)
+    ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text').trim()||'#e8e6e3'
+    ctx.font='bold 13px system-ui';ctx.textAlign='center'
+    ctx.fillText(Math.round(d.avg).toLocaleString(),x+bw/2,pad.t+gh-h-6)
+    ctx.fillStyle=t3;ctx.font='11px system-ui'
+    ctx.fillText('('+d.count+' séances)',x+bw/2,pad.t+gh-h+20)
+  })
+}
+
+function draw1rmTable(){
+  const el=document.getElementById('ch-1rm');if(!el)return
+  const d=appData
+  const exercises=new Map()
+  for(const w of d.workouts){
+    const s=getSeshByDate(d,w)
+    for(const e of w.exercises){
+      if(!e.sets.length)continue
+      const def=s.exercises.find(x=>x.id===e.exerciseId)
+      const name=def?def.name:e.exerciseId
+      const best1rm=e.sets.reduce((max,st)=>{
+        const rm=est1RM(st.reps,st.weight)
+        return rm>max?rm:max
+      },0)
+      if(!exercises.has(name)||best1rm>exercises.get(name).rm){
+        const lastSet=e.sets.reduce((best,st)=>{
+          const rm=est1RM(st.reps,st.weight)
+          return rm>est1RM(best.reps,best.weight)?st:best
+        },e.sets[0])
+        exercises.set(name,{rm:best1rm,reps:lastSet.reps,weight:lastSet.weight,date:w.date})
+      }
+    }
+  }
+  if(!exercises.size){el.innerHTML='<div class="text-3" style="padding:12px">Pas assez de données</div>';return}
+  let html=`<table><tr><th>Exercice</th><th>1RM estimé</th><th>Meilleure série</th><th>Date</th></tr>`
+  for(const[name,data]of[...exercises.entries()].sort((a,b)=>b[1].rm-a[1].rm)){
+    html+=`<tr><td style="font-weight:500">${esc(name)}</td>
+      <td style="font-weight:700;font-family:var(--font-mono);color:var(--accent)">${data.weight>0?data.rm+' kg':'PDC'}</td>
+      <td style="font-family:var(--font-mono)">${data.reps}×${displayWeight(data.weight,false)}</td>
+      <td class="text-3">${fmtDate(data.date)}</td></tr>`
+  }
+  html+=`</table>`
+  el.innerHTML=html
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SETTINGS VIEW
+// ═══════════════════════════════════════════════════════════════════
+
+function renderSettings(){
+  const v=document.getElementById('view-settings')
+  const d=appData
+  const size=new Blob([JSON.stringify(d)]).size
+  const sizeStr=size>1024?(size/1024).toFixed(1)+' ko':size+' o'
+
+  let html=`<div class="page-header"><div>
+    <h1 class="page-title">Réglages</h1>
+    <div class="page-subtitle">Gestion des données et transfert</div>
+  </div></div>`
+
+  html+=`<div class="card settings-card"><div class="card-title">Transfert de données</div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:14px;color:var(--text-2)">Fichier: <strong>force-v4.json</strong></div>
+      <div style="font-size:13px;color:var(--text-3)">${sizeStr} · ${d.workouts.length} séances</div>
+    </div>
+    <div class="settings-actions">
+      <button class="btn btn-import" onclick="showImportCode()">📥 Importer un code</button>
+      <button class="btn btn-primary" onclick="showExportCode()">📤 Exporter code</button>
+      <button class="btn btn-secondary" onclick="exportJson()">💾 Export JSON</button>
+      <button class="btn btn-secondary" onclick="exportCsv()">📊 Export CSV</button>
+    </div>
+  </div>`
+
+  html+=`<div class="card settings-card"><div class="card-title">Programme</div>
+    <div class="settings-actions">
+      <button class="btn btn-secondary" onclick="showExportProgramCode()">📤 Exporter le programme seul</button>
+    </div>
+    <div class="text-3" style="font-size:12px;margin-top:8px">Pour transférer le programme vers l'app mobile</div>
+  </div>`
+
+  html+=`<div class="card settings-card">
+    <div class="card-title">Statistiques</div>
+    <div class="settings-stats-grid">
+      <div class="stat-box"><div class="card-value">${d.workouts.length}</div><div class="card-label">Séances</div></div>
+      <div class="stat-box"><div class="card-value">${d.programs.reduce((t,p)=>t+p.sessions.length,0)}</div><div class="card-label">Types séance</div></div>
+      <div class="stat-box"><div class="card-value">${calcStreak(d)}</div><div class="card-label">Streak</div></div>
+      <div class="stat-box"><div class="card-value">${d.workouts.reduce((t,w)=>t+calcVol(w),0).toLocaleString()}</div><div class="card-label">Volume total</div></div>
+    </div>
+  </div>`
+
+  html+=`<div class="card settings-card">
+    <div class="card-title">Actions</div>
+    <div class="settings-actions">
+      <button class="btn btn-danger" onclick="doResetDashboard()">Tout effacer</button>
+    </div>
+  </div>`
+
+  html+=`<div class="card settings-card">
+    <div style="font-size:13px;color:var(--text-3)">
+      <div style="font-weight:600;color:var(--text);margin-bottom:4px">Force V4 — Dashboard</div>
+      <div>Fichier unique · Zéro dépendance · Fonctionne en file://</div>
+      <div style="margin-top:4px">Version données: ${d.version}</div>
+    </div>
+  </div>`
+
+  v.innerHTML=html
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  WORKOUT EDITOR
+// ═══════════════════════════════════════════════════════════════════
+
+function editWorkout(id){
+  const w=appData.workouts.find(x=>x.id===id)
+  if(!w)return
+  const s=getSeshByDate(appData,w)
+  let html=`<div class="modal-title">Modifier séance · ${fmtDate(w.date)}</div>
+    <div style="margin-bottom:16px;font-size:13px;color:var(--text-2)">Modifie les séries ci-dessous</div>`
+  for(let ei=0;ei<w.exercises.length;ei++){
+    const ex=w.exercises[ei]
+    const def=s.exercises.find(e=>e.id===ex.exerciseId)
+    html+=`<div class="exercise-block" style="margin-bottom:12px">
+      <div class="exercise-block-name">${esc(def?def.name:ex.exerciseId)}</div>
+      <div id="edit-sets-${ei}" style="margin-top:6px">`
+    for(let si=0;si<ex.sets.length;si++){
+      const st=ex.sets[si]
+      html+=`<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px" id="edit-set-${ei}-${si}">
+        <span class="badge badge-accent" style="font-size:11px">${si+1}</span>
+        <input class="input" id="edit-reps-${ei}-${si}" type="number" min="0" value="${st.reps}" style="width:70px;padding:6px 8px;font-size:13px" placeholder="Reps">
+        <span style="color:var(--text-3)">×</span>
+        <input class="input" id="edit-wt-${ei}-${si}" type="number" min="0" step="0.25" value="${st.weight}" style="width:80px;padding:6px 8px;font-size:13px" placeholder="Kg">
+        <button class="btn btn-sm btn-ghost" style="color:var(--danger);padding:4px 8px" onclick="removeEditSet(${ei},${si},'${id}')">✕</button>
+      </div>`
+    }
+    html+=`</div>
+      <button class="btn btn-sm btn-secondary" onclick="addEditSet(${ei},'${id}')" style="margin-top:4px;font-size:12px">+ Série</button>
+      <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+        <span style="font-size:12px;color:var(--text-2)">RPE:</span>
+        <select class="input" id="edit-rpe-${ei}" style="width:auto;padding:4px 8px;font-size:12px" onchange="markEditDirty()">
+          ${[0,1,2,3,4,5,6,7,8,9,10].map(v=>`<option value="${v}"${ex.rpe===v?' selected':''}>${v||'-'}</option>`).join('')}
+        </select>
+        <span style="font-size:12px;color:var(--text-2)">Note:</span>
+        <input class="input" id="edit-notes-${ei}" value="${esc(ex.notes||'')}" style="flex:1;padding:4px 8px;font-size:12px" placeholder="Optionnelle" onchange="markEditDirty()">
+      </div>
+    </div>`
+  }
+  html+=`<div class="modal-actions">
+    <button class="btn btn-secondary" onclick="hideModal()">Annuler</button>
+    <button class="btn btn-primary" onclick="saveWorkoutEdit('${id}')">Sauvegarder</button>
+  </div>`
+  window._editDirty=false
+  showModal(html,'modal-lg')
+}
+
+let _editDirty=false
+function markEditDirty(){_editDirty=true}
+function addEditSet(ei,id){
+  const el=document.getElementById('edit-sets-'+ei)
+  if(!el)return
+  const si=el.children.length
+  const div=document.createElement('div')
+  div.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:4px'
+  div.id='edit-set-'+ei+'-'+si
+  div.innerHTML=`<span class="badge badge-accent" style="font-size:11px">${si+1}</span>
+    <input class="input" id="edit-reps-${ei}-${si}" type="number" min="0" value="0" style="width:70px;padding:6px 8px;font-size:13px" placeholder="Reps">
+    <span style="color:var(--text-3)">×</span>
+    <input class="input" id="edit-wt-${ei}-${si}" type="number" min="0" step="0.25" value="0" style="width:80px;padding:6px 8px;font-size:13px" placeholder="Kg">
+    <button class="btn btn-sm btn-ghost" style="color:var(--danger);padding:4px 8px" onclick="removeEditSet(${ei},${si},'${id}')">✕</button>`
+  el.appendChild(div)
+  _editDirty=true
+}
+function removeEditSet(ei,si,id){
+  const el=document.getElementById('edit-set-'+ei+'-'+si)
+  if(el)el.remove()
+  _editDirty=true
+  // Renumber badges
+  const container=document.getElementById('edit-sets-'+ei)
+  if(container)container.querySelectorAll('.badge').forEach((b,i)=>b.textContent=i+1)
+}
+function saveWorkoutEdit(id){
+  const w=appData.workouts.find(x=>x.id===id)
+  if(!w)return
+  for(let ei=0;ei<w.exercises.length;ei++){
+    const ex=w.exercises[ei]
+    const sets=[]
+    const container=document.getElementById('edit-sets-'+ei)
+    if(container){
+      for(let si=0;si<container.children.length;si++){
+        const repsEl=document.getElementById('edit-reps-'+ei+'-'+si)
+        const wtEl=document.getElementById('edit-wt-'+ei+'-'+si)
+        if(repsEl&&wtEl){
+          sets.push({reps:parseFloat(repsEl.value)||0,weight:parseFloat(wtEl.value)||0})
+        }
+      }
+    }
+    ex.sets=sets
+    const rpeEl=document.getElementById('edit-rpe-'+ei)
+    if(rpeEl)ex.rpe=parseInt(rpeEl.value)||0
+    const notesEl=document.getElementById('edit-notes-'+ei)
+    if(notesEl)ex.notes=notesEl.value.trim()
+  }
+  hideModal();saveDataFile();storeBackup()
+  toast('Séance modifiée','success')
+  renderSessions()
+  if(currentView==='dashboard')renderDashboard()
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  AI ASSISTANT
+// ═══════════════════════════════════════════════════════════════════
+
+const AI_QUESTIONS=[
+  {id:'volume',label:'Mon volume d\'entraînement est-il en progression ?',icon:'📈'},
+  {id:'intensity',label:'Mon intensité (RPE) augmente-t-elle ?',icon:'🔥'},
+  {id:'frequency',label:'Ma fréquence d\'entraînement est-elle régulière ?',icon:'📅'},
+  {id:'weak',label:'Quels sont mes exercices les plus faibles ?',icon:'⚡'},
+  {id:'stagnation',label:'Y a-t-il des stagnations ou régressions ?',icon:'⏸'},
+  {id:'recovery',label:'Mes temps de repos sont-ils adaptés ?',icon:'💤'},
+  {id:'balance',label:'Mon programme est-il équilibré (push/pull/jambes) ?',icon:'⚖️'},
+  {id:'1rm',label:'Où en est mon 1RM estimé par rapport à mes objectifs ?',icon:'🎯'},
+  {id:'comparison',label:'Comment se compare ma meilleure séance à ma moyenne ?',icon:'🏆'},
+]
+
+function toggleAiQuestion(id){
+  const el=document.getElementById('ai-'+id)
+  if(el){el.checked=!el.checked;saveAiChecks()}
+}
+
+function renderAssistant(){
+  const v=document.getElementById('view-assistant')
+  const d=appData
+  const last28=d.workouts.filter(w=>{
+    const diff=(Date.now()-parseLocalDate(w.date).getTime())/864e5
+    return diff<=28
+  })
+  const saved=localStorage.getItem('force_dash_ai_checks')
+  const checked=saved?JSON.parse(saved):{}
+
+  const totalVol=last28.reduce((t,w)=>t+calcVol(w),0)
+  const avgRpeSessions=last28.filter(w=>w.exercises.some(e=>e.rpe>0))
+  const avgRpe=avgRpeSessions.length
+    ?avgRpeSessions.reduce((t,w)=>t+w.exercises.reduce((s,e)=>s+(e.rpe||0),0)/w.exercises.filter(e=>e.rpe>0).length,0)/avgRpeSessions.length
+    :0
+  const types=[...new Set(last28.map(w=>w.sessionId))].length
+
+  let html=`<div class="page-header"><div>
+    <h1 class="page-title">💡 Assistant IA</h1>
+    <div class="page-subtitle">Génère un prompt prêt à copier dans Gemini, Claude ou ChatGPT</div>
+  </div></div>
+
+  <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:24px">
+    <div class="card" style="text-align:center;padding:16px">
+      <div style="font-size:24px">🏋️</div>
+      <div class="card-value" style="font-size:24px">${last28.length}</div>
+      <div class="card-label">Séances (28j)</div>
+    </div>
+    <div class="card" style="text-align:center;padding:16px">
+      <div style="font-size:24px">📊</div>
+      <div class="card-value" style="font-size:24px">${totalVol.toLocaleString()}</div>
+      <div class="card-label">Volume total</div>
+    </div>
+    <div class="card" style="text-align:center;padding:16px">
+      <div style="font-size:24px">🎯</div>
+      <div class="card-value" style="font-size:24px">${avgRpe?avgRpe.toFixed(1):'-'}</div>
+      <div class="card-label">RPE moyen</div>
+    </div>
+    <div class="card" style="text-align:center;padding:16px">
+      <div style="font-size:24px">📋</div>
+      <div class="card-value" style="font-size:24px">${types}</div>
+      <div class="card-label">Types séance</div>
+    </div>
+  </div>`
+
+  html+=`<div class="card" style="padding:20px">
+    <div class="card-title">Personnalise ton analyse</div>
+    <p class="text-2" style="font-size:13px;margin-bottom:14px">Sélectionne ce que tu veux que le coach analyse :</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px">`
+  for(const q of AI_QUESTIONS){
+    const isChecked=checked[q.id]||false
+    html+=`<div class="ai-question" onclick="toggleAiQuestion('${q.id}')">
+      <span style="font-size:16px">${q.icon}</span>
+      <label for="ai-${q.id}" style="cursor:pointer;flex:1;font-size:13px;line-height:1.3">${q.label}</label>
+      <input type="checkbox" id="ai-${q.id}" ${isChecked?'checked':''} onchange="saveAiChecks()" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0" onclick="event.stopPropagation()">
+    </div>`
+  }
+  html+=`</div>`
+
+  html+=`<div class="input-group" style="margin-bottom:0">
+      <label class="input-label">Question personnalisée (optionnelle)</label>
+      <textarea class="input" id="ai-custom-q" placeholder="Ex: Recommande des ajustements pour mon développé couché d'ici 4 semaines..." style="min-height:44px;font-size:13px">${esc(checked._custom||'')}</textarea>
+    </div>
+
+    <button class="btn btn-primary" onclick="generateAiPrompt()" style="margin-top:12px;padding:12px 28px;font-size:15px">🎯 Générer le prompt</button>
+  </div>
+
+  <div class="card" id="ai-result" style="display:none;border-color:var(--accent-bg);border-width:2px;padding:20px">
+    <div class="card-title">📝 Prompt prêt à copier</div>
+    <p class="text-2" style="font-size:12px;margin-bottom:10px">Colle ce prompt dans ton assistant IA préféré (Gemini, Claude, ChatGPT) pour obtenir une analyse personnalisée.</p>
+    <textarea class="ai-prompt-area" id="ai-prompt" readonly onclick="this.select()"></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+      <button class="btn btn-primary" onclick="copyAiPrompt()">📋 Copier</button>
+    </div>
+  </div>`
+
+  v.innerHTML=html
+}
+
+function saveAiChecks(){
+  const checks={}
+  for(const q of AI_QUESTIONS){
+    const el=document.getElementById('ai-'+q.id)
+    if(el)checks[q.id]=el.checked
+  }
+  const custom=document.getElementById('ai-custom-q')
+  if(custom&&custom.value.trim())checks._custom=custom.value.trim()
+  localStorage.setItem('force_dash_ai_checks',JSON.stringify(checks))
+}
+
+function generateAiPrompt(){
+  const d=appData
+  const last28=d.workouts.filter(w=>{
+    const diff=(Date.now()-parseLocalDate(w.date).getTime())/864e5
+    return diff<=28
+  }).sort((a,b)=>parseLocalDate(a.date)-parseLocalDate(b.date))
+
+  if(!last28.length){toast('Pas de séances dans les 28 derniers jours','error');return}
+
+  // Collect checkboxes
+  const checks={}
+  for(const q of AI_QUESTIONS){
+    const el=document.getElementById('ai-'+q.id)
+    if(el)checks[q.id]=el.checked
+  }
+  const customQ=document.getElementById('ai-custom-q')?.value.trim()||''
+  saveAiChecks()
+
+  // Build stats
+  const totalSessions=last28.length
+  const totalVol=last28.reduce((t,w)=>t+calcVol(w),0)
+  const avgRpeSessions=last28.filter(w=>w.exercises.some(e=>e.rpe>0))
+  const avgRpe=avgRpeSessions.length
+    ?avgRpeSessions.reduce((t,w)=>t+w.exercises.reduce((s,e)=>s+(e.rpe||0),0)/w.exercises.filter(e=>e.rpe>0).length,0)/avgRpeSessions.length
+    :0
+  const types=[...new Set(last28.map(w=>w.sessionId))]
+  const seshPerType=types.map(t=>({type:t,count:last28.filter(w=>w.sessionId===t).length,avgVol:Math.round(last28.filter(w=>w.sessionId===t).reduce((s,w)=>s+calcVol(w),0)/Math.max(last28.filter(w=>w.sessionId===t).length,1))}))
+
+  // Per-exercise latest data
+  const exData=[]
+  const seen=new Set()
+  for(const w of last28.slice().reverse()){
+    for(const ex of w.exercises){
+      if(!ex.sets.length||seen.has(ex.exerciseId))continue
+      seen.add(ex.exerciseId)
+      const s=getSeshByDate(d,w)
+      const def=s.exercises.find(e=>e.id===ex.exerciseId)
+      const name=def?def.name:ex.exerciseId
+      const bestSet=ex.sets.reduce((b,st)=>((st.reps||0)*(st.weight||0)>(b.reps||0)*(b.weight||0)?st:b),ex.sets[0])
+      const rm=est1RM(bestSet.reps,bestSet.weight)
+      const prev=getLastEx(d,ex.exerciseId)
+      const prevVol=prev&&prev!==ex?prev.sets.reduce((t,st)=>t+(st.reps||0)*(st.weight||0),0):0
+      const curVol=ex.sets.reduce((t,st)=>t+(st.reps||0)*(st.weight||0),0)
+      exData.push({name,reps:bestSet.reps,weight:bestSet.weight,rm,vol:curVol,prevVol,trend:prevVol>0?Math.round((curVol-prevVol)/prevVol*100):0})
+    }
+  }
+
+  const isActive=checks.volume||checks.intensity||checks.frequency||checks.weak||checks.stagnation||checks.recovery||checks.balance||checks['1rm']||checks.comparison||customQ
+  if(!isActive){toast('Sélectionne au moins une question','error');return}
+
+  let prompt=''
+  // System context
+  prompt+='[CONTEXTE]\n'
+  prompt+='Tu es un coach sportif expert en musculation et force athlétique. Analyse ces données d\'entraînement des 28 derniers jours fournies par l\'utilisateur.\n\n'
+
+  // Data section
+  prompt+='[DONNÉES]\n'
+  prompt+=`Nombre de séances: ${totalSessions}\n`
+  prompt+=`Volume total: ${totalVol} kg\n`
+  prompt+=`RPE moyen: ${avgRpe>0?avgRpe.toFixed(1):'Non renseigné'}/10\n`
+  prompt+=`Types de séance: ${seshPerType.map(t=>`${t.type} (${t.count} séances, ~${t.avgVol} kg/séance)`).join(', ')}\n\n`
+
+  prompt+='Exercices (dernière séance):\n'
+  for(const e of exData){
+    prompt+=`- ${e.name}: ${e.reps}×${e.weight>0?e.weight+'kg':'PDC'}, 1RM estimé ${e.rm>0?e.rm+'kg':'-'}, volume ${e.vol} kg`
+    if(e.prevVol>0)prompt+=` (${e.trend>0?'+':''}${e.trend}% vs précédent)`
+    prompt+='\n'
+  }
+  prompt+='\n'
+
+  // Questions section
+  prompt+='[QUESTIONS]\n'
+  if(checks.volume)prompt+='- Mon volume d\'entraînement est-il en progression sur les 4 dernières semaines ? Recommande des ajustements si nécessaire.\n'
+  if(checks.intensity)prompt+='- Mon intensité (RPE) augmente-t-elle ? Y a-t-il des signes de sous-entraînement ou surentraînement ?\n'
+  if(checks.frequency)prompt+='- Ma fréquence d\'entraînement est-elle régulière et optimale pour progresser ?\n'
+  if(checks.weak)prompt+='- Quels sont mes exercices les plus faibles en volume ou charge ? Donne des priorités d\'amélioration.\n'
+  if(checks.stagnation)prompt+='- Y a-t-il des stagnations ou régressions visibles dans mes séances ? Que recommandes-tu ?\n'
+  if(checks.recovery)prompt+='- Mes temps de repos et ma fréquence semblent-ils adaptés à ma récupération ?\n'
+  if(checks.balance)prompt+='- Mon programme est-il équilibré entre poussée, tirage et jambes ? Quels déséquilibres vois-tu ?\n'
+  if(checks['1rm'])prompt+='- Où en sont mes 1RM estimés ? Suggère des charges cibles pour chaque mouvement clé.\n'
+  if(checks.comparison)prompt+='- Quelle est ma meilleure séance par rapport à ma moyenne ? Qu\'est-ce qui fait la différence ?\n'
+  if(customQ)prompt+='- '+customQ+'\n'
+
+  prompt+='\n[FORMAT]\n'
+  prompt+='Réponds en français, en français ! Structure ta réponse en sections claires avec des recommandations actionnables. Sois précis avec les charges et séries quand tu suggères des changements. Termine par un récapitulatif des 3 actions prioritaires.\n'
+
+  const el=document.getElementById('ai-prompt')
+  const result=document.getElementById('ai-result')
+  if(el){el.value=prompt;result.style.display='block'}
+  result.scrollIntoView({behavior:'smooth'})
+  toast('Prompt généré !','success')
+}
+
+function copyAiPrompt(){
+  const el=document.getElementById('ai-prompt')
+  if(!el)return
+  navigator.clipboard.writeText(el.value).then(()=>toast('Copié !','success')).catch(()=>toast('Copie manuelle','error'))
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  CALENDAR — planification 2 semaines
+// ═══════════════════════════════════════════════════════════════════
+
+function getDayAssignment(d,dateStr,dayIdx){
+  // Check explicit grid first
+  if(d.scheduleGrid[dateStr]){
+    const a=d.scheduleGrid[dateStr]
+    const prog= a.progName ? d.programs.find(p=>p.name===a.progName) : (a.progIdx!==undefined ? d.programs[a.progIdx] : null)
+    const sesh=prog?prog.sessions.find(s=>s.id===a.sessionId):null
+    return {explicit:true,prog,sesh,sessionId:a.sessionId,progName:a.progName}
+  }
+  // Fall back to template
+  const tmpl=d.scheduleTemplate&&d.scheduleTemplate[dayIdx]
+  if(tmpl){
+    const prog= tmpl.progName ? d.programs.find(p=>p.name===tmpl.progName) : (tmpl.progIdx!==undefined ? d.programs[tmpl.progIdx] : null)
+    const sesh=prog?prog.sessions.find(s=>s.id===tmpl.sessionId):null
+    return {explicit:false,prog,sesh,sessionId:tmpl.sessionId,progName:tmpl.progName}
+  }
+  return {explicit:false,prog:null,sesh:null,sessionId:null,progName:null}
+}
+
+let calendarOffset=0
+
+function renderPlanningCalendar(container){
+  const d=appData
+  const today=new Date()
+  const start=new Date(today.getFullYear(),today.getMonth(),today.getDate()+calendarOffset*14)
+  // Aligner au lundi
+  const dayOfWeek=start.getDay()
+  const mondayOffs=(dayOfWeek===0?6:dayOfWeek-1)
+  start.setDate(start.getDate()-mondayOffs)
+  const dayNames=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam']
+  const dayNamesFull=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi']
+
+  let html=`<div class="calendar-nav">
+    <button class="btn btn-sm btn-secondary" onclick="calendarOffset--;renderPlanningCalendar(document.getElementById('cal-container'))">‹ Précédent</button>
+    <span style="font-weight:600;font-size:15px">${start.toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}</span>
+    <button class="btn btn-sm btn-secondary" onclick="calendarOffset++;renderPlanningCalendar(document.getElementById('cal-container'))">Suivant ›</button>
+  </div>
+  <div class="calendar-grid">`
+
+  for(let d2=0;d2<14;d2++){
+    const date=new Date(start)
+    date.setDate(date.getDate()+d2)
+    const dateStr=fmtDateStr(date)
+    const dayIdx=date.getDay()
+    const isToday=dateStr===fmtDateStr(today)
+    const a=getDayAssignment(d,dateStr,dayIdx)
+    const isRest=!a.sesh&&!a.prog
+
+    let label='Repos',labelColor='var(--text-3)',badgeCls=''
+    if(a.sesh){
+      label=(a.sesh.name||a.sessionId)
+      badgeCls=a.prog?'badge-session-'+(a.prog.sessions.findIndex(s=>s.id===a.sessionId)%8):''
+      labelColor=badgeCls?'inherit':'var(--accent)'
+    }else if(a.prog){
+      label=a.prog.name
+      labelColor='var(--text-2)'
+    }
+
+    html+=`<div class="calendar-day${isToday?' today':''}${isRest?'':''}" onclick="showDayPicker('${dateStr}')" title="${dayNamesFull[dayIdx]} ${dateStr}">
+      <div class="day-name">${dayNames[dayIdx]}</div>
+      <div class="day-num">${date.getDate()}</div>
+      <div class="day-label" style="color:${labelColor}">
+        ${badgeCls?`<span class="badge ${badgeCls}">${label}</span>`:label}
+      </div>
+      ${a.explicit&&a.sesh?`<div class="day-source" style="font-size:8px;color:var(--accent-bg);margin-top:1px">●</div>`:''}
+    </div>`
+  }
+
+  html+=`</div>`
+
+  // Template editor — Monday-first order: 1(Lun)..6(Sam),0(Dim)
+  const dayNamesShort=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam']
+  const tmplOrder=[1,2,3,4,5,6,0]
+  html+=`<div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+    <div class="card-title" style="margin-bottom:6px">Modèle hebdomadaire</div>
+    <div class="text-3" style="font-size:12px;margin-bottom:10px">
+      Règle générale pour chaque jour de la semaine. 
+      Les <strong>●</strong> dans le calendrier signalent un jour surchargé (différent du modèle).
+      Choisis <em>— Suivant —</em> en Séance pour utiliser la prochaine séance disponible dans l'ordre du programme.
+    </div>`
+  html+=`<div style="display:grid;grid-template-columns:60px 1fr 1fr;gap:6px;align-items:center">`
+  html+=`<div class="text-3" style="font-size:11px;font-weight:600"></div>
+    <div class="text-3" style="font-size:11px;font-weight:600">Programme</div>
+    <div class="text-3" style="font-size:11px;font-weight:600">Séance</div>`
+  for(const di of tmplOrder){
+    const tmpl=d.scheduleTemplate&&d.scheduleTemplate[di]
+    const selProgName=tmpl?tmpl.progName??(tmpl.progIdx!==undefined?d.programs[tmpl.progIdx]?.name:''):''
+    const selSessionId=tmpl?tmpl.sessionId:''
+    html+=`<div style="font-size:13px;font-weight:600;color:var(--text)">${dayNamesShort[di]}</div>
+      <select class="input" style="padding:6px 8px;font-size:12px" onchange="saveTemplateDay(${di},'progName',this.value)">
+        <option value="">— Repos —</option>
+        ${d.programs.map(p=>`<option value="${esc(p.name)}"${selProgName===p.name?' selected':''}>${esc(p.name)}</option>`).join('')}
+      </select>
+      <select class="input" style="padding:6px 8px;font-size:12px" onchange="saveTemplateDay(${di},'sessionId',this.value)" ${selProgName===''?'disabled':''}>
+        <option value="">— Suivant —</option>
+        ${selProgName!==''&&d.programs.find(p=>p.name===selProgName)?d.programs.find(p=>p.name===selProgName).sessions.map(s=>`<option value="${esc(s.id)}"${selSessionId===s.id?' selected':''}>${esc(s.name||s.id)}</option>`).join(''):''}
+      </select>`
+  }
+  html+=`</div></div>`
+
+  container.innerHTML=html
+}
+
+function showDayPicker(dateStr){
+  const d=appData
+  const date=new Date(dateStr+'T12:00:00')
+  const dayIdx=date.getDay()
+  const dayNames=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi']
+  const current=d.scheduleGrid[dateStr]||null
+  const curProgName=current?current.progName??(current.progIdx!==undefined?d.programs[current.progIdx]?.name:''):''
+  const curSessionId=current?current.sessionId:''
+  const tmpl=d.scheduleTemplate&&d.scheduleTemplate[dayIdx]
+  const isFromTemplate=tmpl&&!current
+
+  let html=`<div class="modal-title">${dayNames[dayIdx]} ${date.getDate()} ${date.toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}</div>
+    <div style="margin-bottom:16px">`
+
+  // Show template info
+  if(isFromTemplate){
+    const tpName=tmpl.progName??(tmpl.progIdx!==undefined?d.programs[tmpl.progIdx]?.name:'')
+    const tp=tpName?d.programs.find(p=>p.name===tpName):null
+    const ts=tp?tp.sessions.find(s=>s.id===tmpl.sessionId):null
+    html+=`<div class="text-3" style="font-size:12px;margin-bottom:10px;background:var(--surface-2);padding:8px 10px;border-radius:var(--radius)">
+      Modèle appliqué : ${tp?esc(tp.name):'—'} ${ts?' · '+esc(ts.name||ts.id):''}
+      <br><span style="font-size:11px">Modifie ci-dessous pour surcharger ce jour.</span>
+    </div>`
+  }
+
+  html+=`<div class="input-group">
+        <label class="input-label">Programme</label>
+        <select class="input" id="day-prog" onchange="onDayProgChange()">`
+  html+=`<option value="">— Repos —</option>`
+  d.programs.forEach(p=>{
+    html+=`<option value="${esc(p.name)}"${curProgName===p.name?' selected':''}>${esc(p.name)}</option>`
+  })
+  html+=`</select></div>
+    <div class="input-group">
+      <label class="input-label">Séance spécifique</label>
+      <select class="input" id="day-sesh">`
+  html+=`<option value="">— Suivant dans l'ordre —</option>`
+  if(curProgName&&d.programs.find(p=>p.name===curProgName)){
+    d.programs.find(p=>p.name===curProgName).sessions.forEach(s=>{
+      html+=`<option value="${esc(s.id)}"${curSessionId===s.id?' selected':''}>${esc(s.name||s.id)}</option>`
+    })
+  }
+  html+=`</select></div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-2);margin-top:12px;cursor:pointer">
+      <input type="checkbox" id="day-save-tmpl"> Appliquer à tous les ${dayNames[dayIdx].toLowerCase()} du modèle
+    </label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="clearDayPick('${dateStr}')">Effacer</button>
+      <button class="btn btn-primary" onclick="saveDayPick('${dateStr}')">Valider</button>
+    </div>`
+  showModal(html)
+}
+
+function onDayProgChange(){
+  const name=document.getElementById('day-prog').value
+  const sel=document.getElementById('day-sesh')
+  sel.innerHTML='<option value="">— Par défaut —</option>'
+  const prog=name?appData.programs.find(p=>p.name===name):null
+  if(prog){
+    prog.sessions.forEach(s=>{
+      sel.innerHTML+=`<option value="${esc(s.id)}">${esc(s.name||s.id)}</option>`
+    })
+    sel.disabled=false
+  }else{
+    sel.disabled=true
+  }
+}
+
+function clearDayPick(dateStr){
+  delete appData.scheduleGrid[dateStr]
+  saveDataFile();storeBackup()
+  hideModal()
+  const cal=document.getElementById('cal-container')
+  if(cal)renderPlanningCalendar(cal)
+  toast('Surcharge retirée','success')
+}
+
+function saveDayPick(dateStr){
+  const d=appData
+  const progName=document.getElementById('day-prog').value
+  const sessionId=document.getElementById('day-sesh').value
+  const saveTmpl=document.getElementById('day-save-tmpl').checked
+  const date=new Date(dateStr+'T12:00:00')
+  const dayIdx=date.getDay()
+
+  if(!progName){
+    // Rest day
+    delete d.scheduleGrid[dateStr]
+  }else{
+    d.scheduleGrid[dateStr]={progName,sessionId:sessionId||null}
+  }
+
+  if(saveTmpl){
+    if(!d.scheduleTemplate)d.scheduleTemplate={}
+    if(!progName){
+      delete d.scheduleTemplate[dayIdx]
+    }else{
+      d.scheduleTemplate[dayIdx]={progName,sessionId:sessionId||null}
+    }
+  }
+
+  hideModal();saveDataFile();storeBackup()
+  const cal=document.getElementById('cal-container')
+  if(cal)renderPlanningCalendar(cal)
+  toast('Jour planifié','success')
+}
+
+function saveTemplateDay(dayIdx,field,val){
+  const d=appData
+  if(!d.scheduleTemplate)d.scheduleTemplate={}
+  const entry=d.scheduleTemplate[dayIdx]
+  if(field==='progName'){
+    if(val===''){
+      delete d.scheduleTemplate[dayIdx]
+    }else{
+      d.scheduleTemplate[dayIdx]={progName:val,sessionId:entry?entry.sessionId:null}
+      // Reset session if it doesn't belong to the selected program
+      const prog=d.programs.find(p=>p.name===val)
+      if(entry&&entry.sessionId&&prog&&!prog.sessions.find(s=>s.id===entry.sessionId)){
+        d.scheduleTemplate[dayIdx].sessionId=null
+      }
+    }
+  }else if(field==='sessionId'){
+    if(!entry&&val!==''){
+      // Should not happen without a program, but guard
+    }else if(entry){
+      if(val==='')entry.sessionId=null
+      else entry.sessionId=val
+    }
+  }
+  saveDataFile();storeBackup()
+  const cal=document.getElementById('cal-container')
+  if(cal)renderPlanningCalendar(cal)
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  EXPORT/IMPORT
+function showExportCode(){
+  const code=exportToCode(appData)
+  if(!code){toast('Erreur d\'export','error');return}
+  showModal(`<div class="modal-title">Code d'export</div>
+    <p class="text-2" style="font-size:13px;margin-bottom:8px">Copie ce code pour l'importer dans l'autre application.</p>
+    <textarea class="code-area" readonly style="min-height:150px" onclick="this.select()">${code}</textarea>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="copyModalCode(this)">Copier</button>
+      <button class="btn btn-secondary" onclick="hideModal()">Fermer</button>
+    </div>`)
+}
+
+function showImportCode(){
+  showModal(`<div class="modal-title">Importer un code</div>
+    <p class="text-2" style="font-size:13px;margin-bottom:8px">Colle le code exporté depuis l'autre application.</p>
+    <textarea class="code-area" id="import-code" placeholder="Colle le code ici..." style="min-height:120px"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="hideModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="doImportCode()">Importer</button>
+    </div>`)
+}
+
+function doImportCode(){
+  const code=document.getElementById('import-code').value.trim()
+  if(!code){toast('Colle d\'abord un code','error');return}
+  try{
+    const imported=importFromCode(code)
+    const result=mergeData(appData,imported)
+    appData=result.data
+    saveDataFile();storeBackup()
+    hideModal()
+    toast(result.added+' séance(s) importée(s) !','success')
+    renderSettings()
+  }catch(e){toast(e.message,'error')}
+}
+
+function copyModalCode(btn){
+  const el=btn.parentElement.parentElement.querySelector('.code-area');const code=el.value||el.textContent
+  navigator.clipboard.writeText(code).then(()=>{toast('Copié !','success')}).catch(()=>{toast('Copie manuelle','error')})
+}
+
+function showExportProgramCode(){
+  const progOnly={version:appData.version||3,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),program:JSON.parse(JSON.stringify(appData.program)),workouts:[]}
+  const code=exportToCode(progOnly)
+  if(!code){toast('Erreur d\'export','error');return}
+  showModal(`<div class="modal-title">Code du programme</div>
+    <p class="text-2" style="font-size:13px;margin-bottom:8px">À importer dans l'app mobile pour configurer le programme.</p>
+    <textarea class="code-area" readonly style="min-height:120px" onclick="this.select()">${code}</textarea>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="copyModalCode(this)">Copier</button>
+      <button class="btn btn-secondary" onclick="hideModal()">Fermer</button>
+    </div>`)
+}
+
+function exportJson(){
+  const blob=new Blob([JSON.stringify(appData,null,2)],{type:'application/json'})
+  const url=URL.createObjectURL(blob)
+  const a=document.createElement('a')
+  a.href=url;a.download='force-v4-export.json';a.click()
+  URL.revokeObjectURL(url)
+  toast('JSON exporté','success')
+}
+
+function doResetDashboard(){
+  if(!confirm('Tout effacer ? Cette action est irréversible.')) return
+  appData=deepClone(DEFAULT_DATA)
+  saveDataFile()
+  storeBackup()
+  renderDashboard()
+  switchView('dashboard')
+  toast('Données effacées','success')
+}
+
+function exportCsv(){
+  const rows=[['Date','Session','Exercice','Serie','Reps','Charge','RPE','Notes']]
+  for(const w of appData.workouts){
+    for(const ex of w.exercises){
+      const s=getSeshByDate(appData,w)
+      const def=s.exercises.find(e=>e.id===ex.exerciseId)
+      const name=def?def.name:ex.exerciseId
+      for(let i=0;i<ex.sets.length;i++){
+        const st=ex.sets[i]
+        rows.push([escCsv(w.date),escCsv(w.sessionId),escCsv(name),escCsv(i+1),escCsv(st.reps),escCsv(st.weight),escCsv(ex.rpe||''),escCsv(ex.notes||'')])
+      }
+    }
+  }
+  const csv=rows.map(r=>r.join(',')).join('\n')
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'})
+  const url=URL.createObjectURL(blob)
+  const a=document.createElement('a')
+  a.href=url;a.download='force-v4-export.csv';a.click()
+  URL.revokeObjectURL(url)
+  toast('CSV exporté','success')
+}
+
+// ── SHARED EXPORT UTILS (keep in sync with mobile) ──
+function esc(str){
+  if(typeof str!=='string') return str
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;')
+}
+function escCsv(str){
+  if(str==null) return ''
+  const s=String(str)
+  if(s.includes(',')||s.includes('"')||s.includes('\n')||s.includes('\r')){
+    return '"'+s.replace(/"/g,'""')+'"'
+  }
+  return s
+}
+function exportToCode(data){
+  try{
+    return btoa(unescape(encodeURIComponent(JSON.stringify(data))))
+  }catch(e){console.error('Export failed',e);return null}
+}
+function importFromCode(code){
+  try{
+    const json=decodeURIComponent(escape(atob(code)))
+    const data=JSON.parse(json)
+    validateImport(data)
+    return data
+  }catch(e){if(e.message&&e.message.startsWith('Format'))throw e;throw new Error('Code invalide ou corrompu')}
+}
+function validateImport(data){
+  if(!data||typeof data!=='object')throw new Error('Format invalide : données non trouvées')
+  if(!data.version||typeof data.version!=='number')throw new Error('Format invalide : version manquante')
+  if(!data.program||typeof data.program!=='object')throw new Error('Format invalide : programme manquant')
+  if(!Array.isArray(data.program.sessions))throw new Error('Format invalide : sessions doit être un tableau')
+  for(const s of data.program.sessions){
+    if(!s.id||typeof s.id!=='string')throw new Error('Format invalide : session sans ID')
+    if(!Array.isArray(s.exercises))throw new Error('Format invalide : exercices doit être un tableau')
+    for(const e of s.exercises){
+      if(!e.id||!e.name)throw new Error('Format invalide : exercice sans ID ou nom')
+    }
+  }
+  if(!Array.isArray(data.workouts))throw new Error('Format invalide : workouts doit être un tableau')
+  for(const w of data.workouts){
+    if(!w.id)throw new Error('Format invalide : workout sans ID')
+    if(!Array.isArray(w.exercises))throw new Error('Format invalide : workout sans exercices')
+  }
+}
+function mergeData(existing,imported){
+  const existingIds=new Set(existing.workouts.map(w=>w.id))
+  let added=0
+  for(const w of imported.workouts){
+    if(!w.id) continue
+    if(!existingIds.has(w.id)){existing.workouts.push(w);existingIds.add(w.id);added++}
+  }
+  if(imported.program&&imported.program.sessions&&imported.program.sessions.length>0){
+    existing.program=JSON.parse(JSON.stringify(imported.program))
+  }
+  existing.updatedAt=new Date().toISOString()
+  return {data:existing,added}
+}
+
+// ── POLYFILL roundRect ──
+if(!CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+    if(r>w/2)r=w/2;if(r>h/2)r=h/2
+    this.moveTo(x+r,y);this.lineTo(x+w-r,y);
+    this.quadraticCurveTo(x+w,y,x+w,y+r);this.lineTo(x+w,y+h-r);
+    this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);this.lineTo(x+r,y+h);
+    this.quadraticCurveTo(x,y+h,x,y+h-r);this.lineTo(x,y+r);
+    this.quadraticCurveTo(x,y,x+r,y);this.closePath()
+  }
+}
+
+// ── INIT ──
+async function init(){
+  const hasDir=await openDataDir()
+  if(!hasDir){
+    if(loadBackup()){
+      toast('Données chargées depuis le navigateur (sauvegarde)','success')
+    } else {
+      appData=deepClone(DEFAULT_DATA)
+    }
+  } else {
+    toast('Dossier de données chargé','success')
+  }
+  migrateDataV2(appData)
+  migrateDataV3(appData)
+  if(!appData.createdAt)appData.createdAt=new Date().toISOString()
+  restoreTheme()
+  storeBackup()
+  setInterval(()=>storeBackup(),30000)
+  switchView('dashboard')
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)saveDataFile()})
+  window.addEventListener('beforeunload',()=>saveDataFile())
+  let resizeTimer
+  window.addEventListener('resize',()=>{
+    clearTimeout(resizeTimer)
+    resizeTimer=setTimeout(()=>{
+      if(currentView==='dashboard')drawVolumeByMonth()
+      if(currentView==='charts'){drawWeightChart();drawVolumeChart();drawRpeChart();drawCompareChart()}
+    },300)
+  })
+}
+
+init()
+</script>
+</body>
+</html>
